@@ -1475,7 +1475,7 @@ lightcurve.plot()
 ```
 
 
-![png](output_26_0.png)
+![png](imgs/bv_cha.png)
 
 
 
@@ -1487,19 +1487,6 @@ client.adql_query("SELECT * FROM aavsovsx WHERE asas_sn_id = 15055")
 
 
 <div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
 <table border="1" class="dataframe">
   <thead>
     <tr style="text-align: right;">
