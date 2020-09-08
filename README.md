@@ -1,198 +1,1734 @@
-# The Big Astronomy Database for ASAS-SN Light Curves
+## ASAS-SN SkyPatrol Python API Demo
 
 The pyasassn client allows users to query the ASAS-SN input catalog and retrieve light curves from our database. These light curves are subject to live updates as we are running continuous photometry on our nightly images.
 
-Our input catalog was built on top of ATLAS Refcat v.2 and is cross-matched with GaiaDR2, Tess Input Catalog v.8, Pan-STARRS DR2, and, SDSS (among others). We also include mean astrometry data from Gaia and Pan-STARRS as provided in ATLAS Refcat. This client provides utilities for complex queries based on these values.
 
 
-## Installation
+### Installation
 
 Make sure your pip points to the appropriate Python >= 3.6 installation...
 <pre><code>
-    git clone https://github.com/gonzodeveloper/bad_asas_sn.git
+    git clone https://github.com/asas-sn/bad_asas_sn.git
     pip3 install bad_asas_sn/
 </code></pre>
 
+### Tutorial
 
-## Tutorial
-
-Make sure you run this in Python >= 3.6
-
-<pre><code>
-  from pyasassn import BadClient
-  
-  client = BadClient(user="USER", passwd="PASSWORD")
-  
-  # Show available columns in ASAS-SN Input Catalog
-  client.catalog_cols
-  
-  ['asas_sn_id', 'refcat_id', 'gaia_id', 'tyc_id', 'tmass_id', 'sdss_id', 'allwise_id', 'tic_id', 
-   'ra_deg', 'dec_deg', 'plx', 'plx_d', 'pm_ra', 'pm_ra_d', 'pm_dec', 'pm_dec_d', 
-   'gaia_mag', 'gaia_mag_d', 'gaia_b_mag', 'gaia_b_mag_d', 'gaia_r_mag', 'gaia_r_mag_d', 
-   'gaia_eff_temp', 'gaia_g_extinc', 'gaia_var', 'sfd_g_extinc', 'rp_00_1', 'rp_01', 'rp_10', 
-   'pstarrs_g_mag', 'pstarrs_g_mag_d', 'pstarrs_g_mag_chi', 'pstarrs_g_mag_contrib', 
-   'pstarrs_r_mag', 'pstarrs_r_mag_d', 'pstarrs_r_mag_chi', 'pstarrs_r_mag_contrib', 
-   'pstarrs_i_mag', 'pstarrs_i_mag_d', 'pstarrs_i_mag_chi', 'pstarrs_i_mag_contrib', 
-   'pstarrs_z_mag', 'pstarrs_z_mag_d', 'pstarrs_z_mag_chi', 'pstarrs_z_mag_contrib']
-  
-</code></pre>
-
-There are three utilities which allow us to query the ASAS-SN Input Catalog and download light curves.
-
-### Cone Search
-With given center coordinates in decimal degrees (J2000) we can run a cone search of arbitrary radius with units of degrees, arcmin, or arcsec.
-
-<pre>
-<code>
-client.cone_search(185, -88, radius=5, units='deg')
-
-          asas_sn_id      ra_deg    dec_deg
-0            1094902   14.059417 -89.846361
-1            1099017  182.038926 -89.804971
-2            1105675  309.260296 -89.743042
-3            1109079   39.243573 -89.709996
-4            1110860  281.009406 -89.701636
-5            1113933  118.787441 -89.677189
-6            1125650  187.000753 -89.610306
-7            1126863  135.324726 -89.603958
-8            1129733   61.005088 -89.588192
-9            1136069  233.224446 -89.562793
-...              ...         ...        ...
-249176   77310295457  177.890152 -83.194816
-249177        970802  193.425940 -83.183269
-249178   77310225365  169.098504 -83.161506
-249179   77310282256  192.055578 -83.143194
-249180   77310309194  180.884440 -83.134782
-249181  266288899297  186.522708 -83.129058
-249182        957559  198.861855 -83.127044
-249183        984101  184.151716 -83.122621
-249184   77310270700  199.919524 -83.097495
-249185   77310224936  184.238288 -83.054113
+Create a SkyPatrolClient object. The client will automatically ping the server for the most recent catalog data.
 
 
-[249186 rows x 3 columns]
+```python
+from pyasassn.client import SkyPatrolClient
 
-</code>
-</pre>
+client = SkyPatrolClient("bad_client", "a5a55N_CLIENT")
+client.catalogs
+```
 
-### SQL Query 
-The BAD severs can parse SQL queries on the targets table. Complex SQL such as nested selects and correlated sub-queries are also supported. 
 
-<pre>
-<code>
+
+
+    
+    Table Name: stellar_main
+    Num Columns: 47
+    
+    Table Name: master_list
+    Num Columns: 4
+    
+    Table Name: comets
+    Num Columns: 1
+    
+    Table Name: swift
+    Num Columns: 56
+    
+    Table Name: allwiseagn
+    Num Columns: 15
+    
+    Table Name: mdwarf
+    Num Columns: 32
+    
+    Table Name: milliquas
+    Num Columns: 21
+    
+    Table Name: fermi
+    Num Columns: 67
+    
+    Table Name: aavsovsx
+    Num Columns: 28
+    
+    Table Name: morx
+    Num Columns: 38
+    
+    Table Name: chandra
+    Num Columns: 516
+    
+    Table Name: asteroids
+    Num Columns: 1
+
+
+
+
+#### Main Catalog
+
+The __stellar_main__ catalog contains the bulk of our targets. It was built off of ATLAS REFCAT2 and contains GAIA, TESS, SDSS, and ALLWISE identifiers where available.
+
+
+```python
+client.catalogs.stellar_main.head(15)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>col_names</th>
+      <th>dtypes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>asas_sn_id</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ra_deg</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>dec_deg</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>refcat_id</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>gaia_id</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>hip_id</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>tyc_id</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>tmass_id</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>sdss_id</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>allwise_id</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>tic_id</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>plx</td>
+      <td>float</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>plx_d</td>
+      <td>float</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>pm_ra</td>
+      <td>float</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>pm_ra_d</td>
+      <td>float</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+#### HEASARC Catalogs
+
+The remaining catalogs were sourced from NASA's HEASARC archive. Each of these retains its original columnar data, though we have appended an __asas_sn_id__ for all of them.
+
+
+```python
+client.catalogs.aavsovsx.head(12)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>col_names</th>
+      <th>dtypes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>asas_sn_id</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ra_deg</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>dec_deg</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>source_number</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>name</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>variability_flag</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>lii</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>bii</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>variability_type</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>max_mag_type</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>max_mag_limit</td>
+      <td>string</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>max_mag</td>
+      <td>double</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+#### The Master List
+
+The __master_list__ contains __asas_sn_ids__ coordinates and catalog sources for all of our targets. All of our catalogs are cross-matched on the master list with a 2-arcsecond cone. 
+
+
+```python
+client.catalogs.master_list
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>col_names</th>
+      <th>dtypes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>asas_sn_id</td>
+      <td>bigint</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>ra_deg</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>dec_deg</td>
+      <td>double</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>catalog_sources</td>
+      <td>array&lt;string&gt;</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+### Cone Seach
+
+Lets run a simple cone-search on the master list. 
+
+
+```python
+client.cone_search(ra_deg=270, dec_deg=88, radius=4, catalog='master_list')
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>ra_deg</th>
+      <th>dec_deg</th>
+      <th>catalog_sources</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>8590494153</td>
+      <td>270.508480</td>
+      <td>84.120395</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>8590493551</td>
+      <td>257.333476</td>
+      <td>84.119978</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>8590494160</td>
+      <td>273.628334</td>
+      <td>84.120183</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>8590494620</td>
+      <td>282.208531</td>
+      <td>84.120019</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>8590493763</td>
+      <td>257.575614</td>
+      <td>84.119906</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>82247</th>
+      <td>317828630672</td>
+      <td>272.518828</td>
+      <td>89.284092</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>82248</th>
+      <td>317828630205</td>
+      <td>0.339976</td>
+      <td>89.284143</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>82249</th>
+      <td>317828630428</td>
+      <td>142.968424</td>
+      <td>89.283984</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>82250</th>
+      <td>317828630825</td>
+      <td>353.474920</td>
+      <td>89.284470</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+    <tr>
+      <th>82251</th>
+      <td>317828648971</td>
+      <td>71.616242</td>
+      <td>89.752714</td>
+      <td>[stellar_main, tic]</td>
+    </tr>
+  </tbody>
+</table>
+<p>82252 rows × 4 columns</p>
+</div>
+
+
+
+### Random Curves 
+
+For whatever reason, if you are interested in random targets from a given catalog, we can give you those too.
+
+
+```python
+client.random_sample(1000, catalog="aavsovsx")
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>ra_deg</th>
+      <th>dec_deg</th>
+      <th>name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>661427528626</td>
+      <td>11.36008</td>
+      <td>-88.53342</td>
+      <td>MASTER OT J004526.42-883200.3</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>17181143984</td>
+      <td>113.42148</td>
+      <td>-87.67768</td>
+      <td>WISE J073341.1-874039</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>17181129184</td>
+      <td>276.53493</td>
+      <td>-86.82375</td>
+      <td>ASASSN-V J182608.32-864925.1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>661427528887</td>
+      <td>294.50733</td>
+      <td>-86.65919</td>
+      <td>ASASSN-14ft</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1118197</td>
+      <td>313.27013</td>
+      <td>-85.89292</td>
+      <td>ASASSN-V J205304.83-855334.5</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>995</th>
+      <td>515397078518</td>
+      <td>265.46100</td>
+      <td>-41.78668</td>
+      <td>ASASSN-V J174150.64-414712.0</td>
+    </tr>
+    <tr>
+      <th>996</th>
+      <td>515397087473</td>
+      <td>210.81929</td>
+      <td>-41.72133</td>
+      <td>ASASSN-V J140316.63-414316.8</td>
+    </tr>
+    <tr>
+      <th>997</th>
+      <td>412316933534</td>
+      <td>8.80896</td>
+      <td>-41.72128</td>
+      <td>ASAS J003514-4143.2</td>
+    </tr>
+    <tr>
+      <th>998</th>
+      <td>515397087308</td>
+      <td>210.42030</td>
+      <td>-41.72102</td>
+      <td>SSS_J140141.0-414314</td>
+    </tr>
+    <tr>
+      <th>999</th>
+      <td>412316939243</td>
+      <td>106.25032</td>
+      <td>-41.72086</td>
+      <td>SSS_J070500.0-414314</td>
+    </tr>
+  </tbody>
+</table>
+<p>1000 rows × 4 columns</p>
+</div>
+
+
+
+### Query Lists
+
+If you have a list of external identifiers you can query our catalogs using these. 
+For the __stellar_main__ catalog, use the __id_col__ parameter.
+For other catalogs you can search by name.
+
+
+```python
+my_tic_ids = [6658326, 46783395, 1021890]
+client.query_list(my_tic_ids, catalog='stellar_main', id_col='tic_id')
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>ra_deg</th>
+      <th>dec_deg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>309238124040</td>
+      <td>329.260377</td>
+      <td>-8.035864</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>335007699083</td>
+      <td>97.045759</td>
+      <td>18.214838</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>335007693701</td>
+      <td>81.164422</td>
+      <td>18.222147</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+my_vso_id = 'ASASSN-V J182608.32-864925.1'
+client.query_list(my_vso_id, catalog='aavsovsx')
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>ra_deg</th>
+      <th>dec_deg</th>
+      <th>name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>17181129184</td>
+      <td>276.53493</td>
+      <td>-86.82375</td>
+      <td>ASASSN-V J182608.32-864925.1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+### ADQL Queries
+
+We have inculded a custom ADQL parser. That will allow users to query targets using this familiar SQL-like language. 
+First, take note how we can use this to perform a cone-search.
+
+
+
+```python
 query = """
-        SELECT 
-          asas_sn_id,
-          tic_id,
-          allwise_id,
-          ra_deg,
-          dec_deg
-        FROM targets
-        WHERE 1=1
-          AND allwise_id IS NOT NULL
-          AND pstarrs_g_mag &lt 15
-       """
-
-client.sql_query(query)
-
-           asas_sn_id     tic_id           allwise_id      ra_deg    dec_deg
-0        335007692536   29672224  J054720.68+181245.5   86.836242  18.212632
-1        335007711317  175232392  J083856.50+181238.2  129.735429  18.210610
-2        335007722570  355927639  J170355.89+181248.0  255.982901  18.213350
-3        335007723070  361655780  J194555.19+181253.4  296.479989  18.214856
-4        206159731552  258784214  J221104.82+181239.1  332.770081  18.210851
-5        335007693701    6658326  J052439.46+181319.7   81.164422  18.222147
-6        335007728881  383621370  J163306.57+181301.9  248.277438  18.217186
-7        206159695117  256356113  J195959.47+181322.7  299.997786  18.223022
-8        335007688516   27438894  J051128.04+181355.4   77.866858  18.232072
-9        335007704147   57127916  J064745.82+181343.6  101.940962  18.228807
-...               ...        ...                  ...         ...        ...
-2622005  309238127672  169848348  J080211.56-080118.3  120.548191  -8.021806
-2622006  292058838531  187311455  J134837.86-080107.2  207.157786  -8.018711
-2622007  292058848628  145961671  J171224.21-080124.8  258.101040  -8.023628
-2622008  292058846883  443370873  J062722.29-080032.2   96.842904  -8.008945
-2622009  292058847558   25189326  J063220.25-080031.4   98.084387  -8.008735
-2622010  292058865968  242900779  J194323.54-080037.6  295.848131  -8.010480
-2622011  309238127813  318557583  J071848.09-080015.0  109.700389  -8.004193
-2622012  292058850385  192717646  J150230.19-080023.7  225.625805  -8.006642
-2622013  309238116904  124460100  J191314.47-080020.5  288.310276  -8.005748
-2622014  292058841663  250974865  J223239.69-080007.7  338.165461  -8.002239
-
-[2622015 rows x 5 columns]
-
-</code>
-</pre>
-
-### Catalog ID Lists
-Users can directly query the ASAS-SN input catalog with lists of IDs from our cross-matched catalogs. 
-
-<pre>
-<code>
-tic_ids = [6658326, 46783395, 1021890]
-
-client.query_list(tic_ids, source='tic')
-     asas_sn_id      ra_deg    dec_deg
-0  335007699083   97.045759  18.214838
-1  335007693701   81.164422  18.222147
-2  309238124040  329.260377  -8.035864
+SELECT 
+ * 
+FROM stellar_main 
+WHERE DISTANCE(ra_deg, dec_deg, 270, -88) <= 5.1
+"""
+client.adql_query(query)
+```
 
 
-</code>
-</pre>
-
-### Random Sample 
-We can also sample n random curves. **Note**, in this case we are going to actually load the light curves.
-
-<pre>
-<code>
-client.random_sample(n=100, mode='load_curves')
-     cams            jd      flux  flux_err        mag    mag_err      limit  fwhm    asas_sn_id
-0      bB  2.458628e+06  3.282811  0.051306  15.109451   0.016988  17.877222  2.10  137439074977
-1      bB  2.458643e+06  3.061332  0.023908  15.185290   0.008489  18.706295  2.07  137439074977
-2      bB  2.458775e+06  3.300841  0.080369  15.103504   0.026465  17.389923  2.03  137439074977
-3      bB  2.458647e+06  3.092052  0.020001  15.174448   0.007031  18.900014  1.98  137439074977
-4      bB  2.458683e+06  3.187874  0.109550  15.141313   0.037353  17.053613  2.02  137439074977
-5      bB  2.458646e+06  3.191097  0.024217  15.140216   0.008249  18.692344  2.03  137439074977
-6      bB  2.458660e+06  3.165176  0.043094  15.149071   0.014799  18.066601  2.06  137439074977
-7      bB  2.458679e+06  3.021726  0.070765  15.199428   0.025455  17.528091  2.11  137439074977
-8      bB  2.458465e+06  3.124673  0.018656  15.163054   0.006490  18.975604  2.25  137439074977
-9      bB  2.458780e+06  3.310110  0.045485  15.100459   0.014936  18.007975  2.02  137439074977
-...   ...           ...       ...       ...        ...        ...        ...   ...           ...
-8750   bH  2.458576e+06  0.801258  0.043365  16.640635   0.058827  18.059795  1.40  644245325039
-8751   bH  2.458864e+06 -0.123485  0.141682  16.774357  99.999000  16.774357  1.38  644245325039
-8752   bH  2.458744e+06  0.911320  0.121939  16.500889   0.145440  16.937285  2.07  644245325039
-8753   bH  2.458570e+06  1.059508  0.066840  16.337305   0.068572  17.590043  1.43  644245325039
-8754   bH  2.458742e+06  0.745269  0.061878  16.719283   0.090247  17.673803  1.45  644245325039
-8755   bH  2.458722e+06  0.898726  0.048800  16.515997   0.059020  17.931600  1.48  644245325039
-8756   bH  2.458658e+06  0.721557  0.067586  16.754389   0.101811  17.578007  1.43  644245325039
-8757   bH  2.458646e+06  0.868027  0.054198  16.553733   0.067867  17.817688  1.45  644245325039
-8758   bH  2.458572e+06  0.838636  0.051550  16.591132   0.066814  17.872071  1.41  644245325039
-8759   bH  2.458873e+06  1.244925  0.297442  15.969134  99.999000  15.969134  1.52  644245325039
-8760   bH  2.458597e+06  1.019070  0.098528  16.379555   0.105092  17.168739  1.44  644245325039
-
-</code>
-</pre>
-
-### Downloading Light Curves
-The previous three functions also accept parameters to download light curves. The function will return the csv filenames in the save dir. An index file will also be created in the **save_dir**.
-<pre>
-<code>
-tic_ids = [6658326, 46783395, 1021890]
-
-client.query_list(tic_ids, source='tic', mode='load_curves', save_dir='tmp/')
-
-['309238124040.csv', '335007693701.csv', '335007699083.csv']
-
-</code>
-</pre>
 
 
-### Notes
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
 
-For any of these functions the client can run in two modes **index or load_curves**: 
-**index** will simply return the subset of the ASAS-SN Input Catalog as a dataframe
-**load_curves** will either return a dataframe containg photometry for all selected targets, or will save the light curves as csv files in a specified directory if **save_dir** is set.
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
 
-Any function called with **load_curves** will acccept **threads** as as parameter. This will fork the process to speed up the de-serialization and formatting for larger numbers of curves. Do not use more **threads** than you have available CPUs on your local machine.
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>ra_deg</th>
+      <th>dec_deg</th>
+      <th>refcat_id</th>
+      <th>gaia_id</th>
+      <th>hip_id</th>
+      <th>tyc_id</th>
+      <th>tmass_id</th>
+      <th>sdss_id</th>
+      <th>allwise_id</th>
+      <th>...</th>
+      <th>pstarrs_r_mag_contrib</th>
+      <th>pstarrs_i_mag</th>
+      <th>pstarrs_i_mag_d</th>
+      <th>pstarrs_i_mag_chi</th>
+      <th>pstarrs_i_mag_contrib</th>
+      <th>pstarrs_z_mag</th>
+      <th>pstarrs_z_mag_d</th>
+      <th>pstarrs_z_mag_chi</th>
+      <th>pstarrs_z_mag_contrib</th>
+      <th>nstat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>1094902</td>
+      <td>14.059417</td>
+      <td>-89.846361</td>
+      <td>180140594164367</td>
+      <td>4611690901807713792</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>1</td>
+      <td>16.174999</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>15.810000</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>1099017</td>
+      <td>182.038926</td>
+      <td>-89.804971</td>
+      <td>231820389264035</td>
+      <td>5764625115221143040</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>1</td>
+      <td>17.544001</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>17.448000</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1105675</td>
+      <td>309.260296</td>
+      <td>-89.743042</td>
+      <td>303092602958351</td>
+      <td>6341076010576210432</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>33</td>
+      <td>12.147000</td>
+      <td>0.021</td>
+      <td>0.03</td>
+      <td>33</td>
+      <td>11.933000</td>
+      <td>0.100</td>
+      <td>0.01</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1109079</td>
+      <td>39.243573</td>
+      <td>-89.709996</td>
+      <td>340392435728006</td>
+      <td>4611694161685666944</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>1</td>
+      <td>17.083000</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>16.879000</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1110860</td>
+      <td>281.009406</td>
+      <td>-89.701636</td>
+      <td>352810094058038</td>
+      <td>6341087418009385600</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>33</td>
+      <td>16.521000</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>16.492001</td>
+      <td>0.100</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>245123</th>
+      <td>77310219747</td>
+      <td>256.853379</td>
+      <td>-83.001130</td>
+      <td>8392568533788677</td>
+      <td>5773920596978196224</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>41</td>
+      <td>16.059000</td>
+      <td>0.022</td>
+      <td>3.28</td>
+      <td>41</td>
+      <td>15.903000</td>
+      <td>0.028</td>
+      <td>0.00</td>
+      <td>9</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>245124</th>
+      <td>77310248925</td>
+      <td>260.635568</td>
+      <td>-82.997364</td>
+      <td>8402606355683196</td>
+      <td>5773744258504279552</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>1</td>
+      <td>16.035999</td>
+      <td>0.090</td>
+      <td>0.02</td>
+      <td>1</td>
+      <td>15.943000</td>
+      <td>0.090</td>
+      <td>0.00</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>245125</th>
+      <td>266288894288</td>
+      <td>276.533820</td>
+      <td>-82.974527</td>
+      <td>8432765338190601</td>
+      <td>6359213240854465280</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>41</td>
+      <td>16.825001</td>
+      <td>0.053</td>
+      <td>0.36</td>
+      <td>9</td>
+      <td>16.875000</td>
+      <td>0.024</td>
+      <td>1.32</td>
+      <td>9</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>245126</th>
+      <td>77310240409</td>
+      <td>278.626894</td>
+      <td>-82.946876</td>
+      <td>8462786268933782</td>
+      <td>6359204964453699328</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>9</td>
+      <td>16.986000</td>
+      <td>0.025</td>
+      <td>0.31</td>
+      <td>9</td>
+      <td>16.709000</td>
+      <td>0.046</td>
+      <td>0.43</td>
+      <td>9</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>245127</th>
+      <td>77310268049</td>
+      <td>263.648603</td>
+      <td>-82.935546</td>
+      <td>8472636486037378</td>
+      <td>5773736699361849344</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>...</td>
+      <td>9</td>
+      <td>17.495001</td>
+      <td>0.059</td>
+      <td>0.46</td>
+      <td>9</td>
+      <td>17.431000</td>
+      <td>0.025</td>
+      <td>0.25</td>
+      <td>9</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>245128 rows × 47 columns</p>
+</div>
 
-For the **cone_search**, **query_list**, and **random_sample** functions, we can pass a parameter to specify which columns of the ASAS-SN Input Catalog we want returned. If none are specified, then the **asas_sn_id**, **ra_deg**, and **dec_deg** will be returned.
+
+
+##### JOINS
+Since we have cross matched all of our catalogs. We can use ADQL to explore targets accross catalogs.
+
+
+```python
+query = """
+SELECT 
+ asas_sn_id,
+ chandra.name AS c_name,
+ swift.name AS s_name  
+FROM chandra 
+JOIN swift USING(asas_sn_id) 
+"""
+client.adql_query(query)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>c_name</th>
+      <th>s_name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>661430542782</td>
+      <td>2CXO J165358.5-395225</td>
+      <td>GROJ1655-40</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>661430564327</td>
+      <td>2CXO J174544.4-285744</td>
+      <td>GALACTICCENTER</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>661430563309</td>
+      <td>2CXO J174538.4-285744</td>
+      <td>GALACTICCENTER</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>661430490720</td>
+      <td>2CXO J132524.3-430110</td>
+      <td>CenA</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>661430501688</td>
+      <td>2CXO J140304.7+541924</td>
+      <td>PTF11kly</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>472</th>
+      <td>661430562283</td>
+      <td>2CXO J174532.1-290054</td>
+      <td>GALACTICCENTER</td>
+    </tr>
+    <tr>
+      <th>473</th>
+      <td>661430562286</td>
+      <td>2CXO J174545.7-290054</td>
+      <td>GALACTICCENTER</td>
+    </tr>
+    <tr>
+      <th>474</th>
+      <td>661430561004</td>
+      <td>2CXO J174547.5-290053</td>
+      <td>GALACTICCENTER</td>
+    </tr>
+    <tr>
+      <th>475</th>
+      <td>661430562813</td>
+      <td>2CXO J174547.4-290052</td>
+      <td>GALACTICCENTER</td>
+    </tr>
+    <tr>
+      <th>476</th>
+      <td>661430468363</td>
+      <td>2CXO J121900.0+472049</td>
+      <td>NGC4258</td>
+    </tr>
+  </tbody>
+</table>
+<p>477 rows × 3 columns</p>
+</div>
+
+
+
+#### Complex Searches
+
+Lets say we were searching for white dwarfs that crossmatched in the VSO catalog.
+
+
+```python
+query = """
+SELECT 
+  asas_sn_id,
+  gaia_id,
+  pstarrs_g_mag,
+  (gaia_mag - (5 * LOG10(plx) - 10)) AS g_mag_abs, 
+  name 
+FROM stellar_main 
+JOIN aavsovsx USING(asas_sn_id)
+WHERE 1=1
+ AND pstarrs_g_mag < 14 
+ AND (gaia_mag - (5 * LOG10(plx) - 10)) > 10
+ AND (gaia_b_mag - gaia_r_mag) < 1.5 
+"""
+client.adql_query(query)
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>gaia_id</th>
+      <th>pstarrs_g_mag</th>
+      <th>g_mag_abs</th>
+      <th>name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>81666</td>
+      <td>5775496815616520960</td>
+      <td>11.407</td>
+      <td>19.708543</td>
+      <td>ASAS J170324-7937.2</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>118602</td>
+      <td>5785843769793058048</td>
+      <td>10.258</td>
+      <td>16.563561</td>
+      <td>ASAS J142524-7758.4</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>588857</td>
+      <td>1055430973963102848</td>
+      <td>11.696</td>
+      <td>15.816850</td>
+      <td>NSV 5012</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>728404</td>
+      <td>2286601456945437952</td>
+      <td>8.677</td>
+      <td>16.979321</td>
+      <td>V0462 Cep</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>882997</td>
+      <td>2296982083661854592</td>
+      <td>13.810</td>
+      <td>25.175794</td>
+      <td>WISE J211009.8+791037</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>86597</th>
+      <td>652835029334</td>
+      <td>5923382022937143680</td>
+      <td>13.345</td>
+      <td>24.216244</td>
+      <td>ASASSN-V J171026.75-553046.2</td>
+    </tr>
+    <tr>
+      <th>86598</th>
+      <td>652835270742</td>
+      <td>5894443632805934976</td>
+      <td>9.793</td>
+      <td>17.875823</td>
+      <td>HD 127021</td>
+    </tr>
+    <tr>
+      <th>86599</th>
+      <td>652835624417</td>
+      <td>5334925216491199360</td>
+      <td>12.149</td>
+      <td>24.397192</td>
+      <td>GDS_J1142208-613045</td>
+    </tr>
+    <tr>
+      <th>86600</th>
+      <td>661425088337</td>
+      <td>5258317985093107072</td>
+      <td>11.683</td>
+      <td>21.799361</td>
+      <td>IV Car</td>
+    </tr>
+    <tr>
+      <th>86601</th>
+      <td>661425544613</td>
+      <td>5335409796224181376</td>
+      <td>11.922</td>
+      <td>22.474754</td>
+      <td>ASASSN-V J114927.29-601925.8</td>
+    </tr>
+  </tbody>
+</table>
+<p>86602 rows × 5 columns</p>
+</div>
+
+
+
+#### Downloading Curves
+
+Any of the previous functions can take __mode='download_curves'__ as a parameter to download the lightcurves coresponding to these targets. 
+
+The client will return a LightCurveCollection object which can be used for further analysis and plotting.
+
+
+```python
+# Should take about 1-2 minutes
+lcs = client.adql_query(query, mode="download_curves", threads=2)
+lcs.data
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>jd</th>
+      <th>flux</th>
+      <th>flux_err</th>
+      <th>mag</th>
+      <th>mag_err</th>
+      <th>limit</th>
+      <th>fwhm</th>
+      <th>asas_sn_id</th>
+      <th>cam</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2.458829e+06</td>
+      <td>20.342858</td>
+      <td>0.088424</td>
+      <td>13.129036</td>
+      <td>0.004725</td>
+      <td>17.286221</td>
+      <td>1.44</td>
+      <td>8590141875</td>
+      <td>bC</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2.458799e+06</td>
+      <td>18.665619</td>
+      <td>0.087248</td>
+      <td>13.222460</td>
+      <td>0.005081</td>
+      <td>17.300755</td>
+      <td>1.43</td>
+      <td>8590141875</td>
+      <td>bC</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2.458828e+06</td>
+      <td>19.152875</td>
+      <td>0.076590</td>
+      <td>13.194481</td>
+      <td>0.004347</td>
+      <td>17.442213</td>
+      <td>1.46</td>
+      <td>8590141875</td>
+      <td>bC</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2.458486e+06</td>
+      <td>20.587438</td>
+      <td>0.018324</td>
+      <td>13.116060</td>
+      <td>0.000967</td>
+      <td>18.995069</td>
+      <td>1.66</td>
+      <td>8590141875</td>
+      <td>bC</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2.458676e+06</td>
+      <td>19.333177</td>
+      <td>0.089922</td>
+      <td>13.184308</td>
+      <td>0.005056</td>
+      <td>17.267982</td>
+      <td>1.50</td>
+      <td>8590141875</td>
+      <td>bC</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>67</th>
+      <td>2.458767e+06</td>
+      <td>11.306272</td>
+      <td>0.104996</td>
+      <td>13.766767</td>
+      <td>0.010094</td>
+      <td>17.099706</td>
+      <td>2.09</td>
+      <td>627065865626</td>
+      <td>bF</td>
+    </tr>
+    <tr>
+      <th>68</th>
+      <td>2.458735e+06</td>
+      <td>11.481891</td>
+      <td>0.097641</td>
+      <td>13.750032</td>
+      <td>0.009243</td>
+      <td>17.178560</td>
+      <td>2.05</td>
+      <td>627065865626</td>
+      <td>bF</td>
+    </tr>
+    <tr>
+      <th>69</th>
+      <td>2.458728e+06</td>
+      <td>11.532006</td>
+      <td>0.087781</td>
+      <td>13.745303</td>
+      <td>0.008274</td>
+      <td>17.294142</td>
+      <td>1.98</td>
+      <td>627065865626</td>
+      <td>bF</td>
+    </tr>
+    <tr>
+      <th>70</th>
+      <td>2.458690e+06</td>
+      <td>8.161064</td>
+      <td>0.085658</td>
+      <td>14.120699</td>
+      <td>0.011409</td>
+      <td>17.320725</td>
+      <td>1.98</td>
+      <td>627065865626</td>
+      <td>bF</td>
+    </tr>
+    <tr>
+      <th>71</th>
+      <td>2.458608e+06</td>
+      <td>11.419176</td>
+      <td>0.054434</td>
+      <td>13.755979</td>
+      <td>0.005181</td>
+      <td>17.812959</td>
+      <td>1.45</td>
+      <td>627065865626</td>
+      <td>bF</td>
+    </tr>
+  </tbody>
+</table>
+<p>10357650 rows × 9 columns</p>
+</div>
+
+
+
+
+```python
+lcs.stats()
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean_mag</th>
+      <th>std_mag</th>
+      <th>epochs</th>
+    </tr>
+    <tr>
+      <th>asas_sn_id</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>6722</th>
+      <td>13.713655</td>
+      <td>0.143119</td>
+      <td>557</td>
+    </tr>
+    <tr>
+      <th>7205</th>
+      <td>9.354485</td>
+      <td>0.433855</td>
+      <td>243</td>
+    </tr>
+    <tr>
+      <th>10138</th>
+      <td>11.980529</td>
+      <td>0.032530</td>
+      <td>410</td>
+    </tr>
+    <tr>
+      <th>12702</th>
+      <td>13.071251</td>
+      <td>0.166151</td>
+      <td>547</td>
+    </tr>
+    <tr>
+      <th>15055</th>
+      <td>12.448167</td>
+      <td>0.345866</td>
+      <td>235</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>661425547786</th>
+      <td>13.487700</td>
+      <td>0.105852</td>
+      <td>137</td>
+    </tr>
+    <tr>
+      <th>661425547969</th>
+      <td>13.287609</td>
+      <td>0.141784</td>
+      <td>54</td>
+    </tr>
+    <tr>
+      <th>661425548441</th>
+      <td>13.690842</td>
+      <td>0.124418</td>
+      <td>157</td>
+    </tr>
+    <tr>
+      <th>661425548470</th>
+      <td>11.917627</td>
+      <td>0.024326</td>
+      <td>143</td>
+    </tr>
+    <tr>
+      <th>661425548591</th>
+      <td>13.108276</td>
+      <td>0.067760</td>
+      <td>157</td>
+    </tr>
+  </tbody>
+</table>
+<p>86539 rows × 3 columns</p>
+</div>
+
+
+
+
+```python
+lightcurve = lcs[15055]
+lightcurve.meta
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>gaia_id</th>
+      <th>pstarrs_g_mag</th>
+      <th>g_mag_abs</th>
+      <th>name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>67265</th>
+      <td>15055</td>
+      <td>5784674881551467392</td>
+      <td>12.351</td>
+      <td>24.402487</td>
+      <td>BV Cha</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+lightcurve.plot()
+```
+
+
+![png](output_26_0.png)
+
+
+
+```python
+client.adql_query("SELECT * FROM aavsovsx WHERE asas_sn_id = 15055")
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>asas_sn_id</th>
+      <th>ra_deg</th>
+      <th>dec_deg</th>
+      <th>source_number</th>
+      <th>name</th>
+      <th>variability_flag</th>
+      <th>lii</th>
+      <th>bii</th>
+      <th>variability_type</th>
+      <th>max_mag_type</th>
+      <th>...</th>
+      <th>min_mag_system</th>
+      <th>epoch</th>
+      <th>epoch_flag</th>
+      <th>period_limit</th>
+      <th>period</th>
+      <th>period_flag</th>
+      <th>ref_bibcode_1</th>
+      <th>ref_bibcode_2</th>
+      <th>ref_bibcode_others</th>
+      <th>class</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>15055</td>
+      <td>195.58829</td>
+      <td>-79.75731</td>
+      <td>9336</td>
+      <td>BV Cha</td>
+      <td>0</td>
+      <td>303.438856</td>
+      <td>-16.896307</td>
+      <td>CWB</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>V</td>
+      <td>2451872.85</td>
+      <td>None</td>
+      <td>None</td>
+      <td>1.23804</td>
+      <td>None</td>
+      <td>1963VeSon...6....1H</td>
+      <td>2009yCat....102025S</td>
+      <td>None</td>
+      <td>2900</td>
+    </tr>
+  </tbody>
+</table>
+<p>1 rows × 28 columns</p>
+</div>
+
+
+
+
+```python
+
+```
