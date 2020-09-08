@@ -81,7 +81,7 @@ client.catalogs.stellar_main.head(15)
 
 <div>
 <table border="1" class="dataframe">
-<font size="2" face="Courier New" >
+<font size="1" face="Courier New" >
   <thead>
     <tr style="text-align: right;">
       <th></th>
