@@ -19,9 +19,10 @@ class SkyPatrolClient:
                         'limit': "magnitude",
                         'fwhm': "pixels"}
 
-    def __init__(self):
+    def __init__(self, user, password):
         self.index = None
-
+        self.user_name = user
+        self.password = password
         try:
             url = "http://asassn-lb01:9006/get_schema"
             url_data = requests.get(url).content
@@ -312,7 +313,8 @@ class SkyPatrolClient:
         """
 
         # Connect Mongo Client
-        client = MongoClient(f"mongodb://bad_client:a5a55N_CLIENT@asassn-lb01.ifa.hawaii.edu:27020/asas_sn")
+        client = MongoClient(f"mongodb://{self.user_name}:{self.password}"
+                             f"@asassn-lb01.ifa.hawaii.edu:27020/asas_sn")
         db = client.asas_sn
 
         if mongo_collection == 'phot':
