@@ -8,8 +8,8 @@ The pyasassn client allows users to query the ASAS-SN input catalog and retrieve
 
 Make sure your pip points to the appropriate Python >= 3.6 installation...
 <pre><code>
-    git clone https://github.com/asas-sn/bad_asas_sn.git
-    pip3 install bad_asas_sn/
+    git clone https://github.com/asas-sn/skypatrol.git
+    pip3 install skypatrol/
 </code></pre>
 
 ### Tutorial

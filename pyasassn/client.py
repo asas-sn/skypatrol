@@ -19,10 +19,7 @@ class SkyPatrolClient:
                         'limit': "magnitude",
                         'fwhm': "pixels"}
 
-    def __init__(self, user, passwd):
-        self.user_name = user
-        self.mongo_passwd = passwd
-
+    def __init__(self):
         self.index = None
 
         try:
@@ -191,6 +188,8 @@ class SkyPatrolClient:
         # Ensure valid columns
         if set(cols).issubset(set(self.catalogs[catalog]['col_names'])) is False:
             raise ValueError("one or more of the listed cols is not a column name in the selected catalog")
+        if id_col not in cols:
+            cols.append(id_col)
 
         if type(tar_ids) in [str, int]:
             tar_ids = [tar_ids]
@@ -313,8 +312,7 @@ class SkyPatrolClient:
         """
 
         # Connect Mongo Client
-        client = MongoClient(f"mongodb://{self.user_name}:{self.mongo_passwd}"
-                             f"@asassn-lb01.ifa.hawaii.edu:27020/asas_sn")
+        client = MongoClient(f"mongodb://bad_client:a5a55N_CLIENT@asassn-lb01.ifa.hawaii.edu:27020/asas_sn")
         db = client.asas_sn
 
         if mongo_collection == 'phot':
