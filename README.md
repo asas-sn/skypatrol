@@ -20,7 +20,7 @@ Create a SkyPatrolClient object. The client will automatically ping the server f
 ```python
 from pyasassn.client import SkyPatrolClient
 
-client = SkyPatrolClient("bad_client", "a5a55N_CLIENT")
+client = SkyPatrolClient("user", "passwd")
 client.catalogs
 ```
 
