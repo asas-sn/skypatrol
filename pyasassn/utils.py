@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from astropy.timeseries import LombScargle
+import matplotlib.pyplot as plt
 
 
 def block_arr(arr, size):
@@ -103,7 +105,6 @@ class LightCurve:
 
 
     def plot(self, figsize=(12,8), savefile=None):
-        import matplotlib.pyplot as plt
 
         errors = self.data.mag_err > 99
         plt.figure(figsize=figsize)
@@ -141,3 +142,34 @@ class LightCurve:
             plt.savefig(savefile)
         else:
             plt.show()
+
+
+    def lomb_scargle(self, plot=True, figsize=(12,8), savefile=None):
+        frequency, power = LombScargle(self.data['jd'], self.data['mag']).autopower()
+        if plot:
+            plt.figure(figsize=figsize)
+
+            plt.plot(frequency, power)
+            suptitle = ""
+            title = ""
+            if 'asas_sn_id' in self.meta.columns:
+                suptitle += f"SkyPatrol ID: {self.meta.asas_sn_id.item()}"
+            if 'name' in self.meta.columns:
+                suptitle += f"\nSource Name: {self.meta.name.item()}"
+            if 'ra_deg' in self.meta.columns:
+                title += f"Right Ascention: {self.meta.ra_deg.item():.05f}"
+            if 'dec_deg' in self.meta.columns:
+                title += f"\nDeclination: {self.meta.dec_deg.item():.05f}"
+
+            title += f"\nEpochs: {self.epochs}"
+            plt.title(title, loc="left", fontsize=10)
+            plt.suptitle(suptitle, fontsize=14)
+            plt.xlabel("Frequemcy")
+            plt.ylabel("Power")
+            plt.grid()
+
+            if savefile:
+                plt.savefig(savefile)
+            else:
+                plt.show()
+        return frequency, power
