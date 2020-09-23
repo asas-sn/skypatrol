@@ -119,10 +119,91 @@ class LightCurve:
                      fmt="v",
                      c="red",
                      label="non-detections")
+        self.label_plots()
         plt.legend()
-        plt.grid()
         plt.xlabel("Date (JD-2450000)")
         plt.ylabel("Magnitude")
+        plt.gca().invert_yaxis()
+
+
+        if savefile:
+            plt.savefig(savefile)
+        else:
+            plt.show()
+
+
+    def lomb_scargle(self, fit_mean=True, center_data=True, nterms=1, normalization='standard',
+                     minimum_frequency=0.001, maximum_frequency=25, method='auto', samples_per_peak=5,
+                     nyquist_factor=5, plot=True, figsize=(12,8), savefile=None):
+
+        # Don't count nondetections
+        errors = self.data.mag_err > 99
+        jd = self.data[~errors].jd
+        mag = self.data[~errors].mag
+
+        ls = LombScargle(jd, mag,
+                         fit_mean=fit_mean,
+                         center_data=center_data,
+                         nterms=nterms,
+                         normalization=normalization)
+
+        frequency, power = ls.autopower(minimum_frequency=minimum_frequency,
+                                        maximum_frequency=maximum_frequency,
+                                        method=method,
+                                        samples_per_peak=samples_per_peak,
+                                        nyquist_factor=nyquist_factor,
+                                        normalization=normalization)
+        if plot:
+            plt.figure(figsize=figsize)
+
+            plt.plot(frequency, power)
+            self.label_plots()
+            plt.xlabel("Frequemcy")
+            plt.ylabel("Power")
+
+            if savefile:
+                plt.savefig(savefile)
+            else:
+                plt.show()
+        return frequency, power, ls
+
+    def find_period(self, frequency, power, best_frequency=None, plot=True, figsize=(12,8), savefile=None):
+
+        # Don't count nondetections
+        errors = self.data.mag_err > 99
+        jd = self.data[~errors].jd
+        mag = self.data[~errors].mag
+
+        if best_frequency is None:
+            best_frequency = frequency[np.argmax(power)]
+
+        # Get inverse for period and fold on time-space
+        period = 1 / best_frequency
+
+        if plot:
+            folded_jd = jd % period
+
+            # Concatenate for multiple peaks
+            x = np.concatenate([folded_jd / period, folded_jd / period + 1])
+            y = np.concatenate([mag, mag])
+
+            plt.figure(figsize=figsize)
+            plt.scatter(x, y)
+            self.label_plots()
+            plt.xlabel("Phase")
+            plt.ylabel("Magnitude")
+            plt.gca().invert_yaxis()
+
+            if savefile:
+                plt.savefig(savefile)
+            else:
+                plt.show()
+
+        return period
+
+
+
+    def label_plots(self):
         suptitle = ""
         title = ""
         if 'asas_sn_id' in self.meta.columns:
@@ -137,39 +218,4 @@ class LightCurve:
         title += f"\nEpochs: {self.epochs}"
         plt.title(title, loc="left", fontsize=10)
         plt.suptitle(suptitle, fontsize=14)
-
-        if savefile:
-            plt.savefig(savefile)
-        else:
-            plt.show()
-
-
-    def lomb_scargle(self, plot=True, figsize=(12,8), savefile=None):
-        frequency, power = LombScargle(self.data['jd'], self.data['mag']).autopower()
-        if plot:
-            plt.figure(figsize=figsize)
-
-            plt.plot(frequency, power)
-            suptitle = ""
-            title = ""
-            if 'asas_sn_id' in self.meta.columns:
-                suptitle += f"SkyPatrol ID: {self.meta.asas_sn_id.item()}"
-            if 'name' in self.meta.columns:
-                suptitle += f"\nSource Name: {self.meta.name.item()}"
-            if 'ra_deg' in self.meta.columns:
-                title += f"Right Ascention: {self.meta.ra_deg.item():.05f}"
-            if 'dec_deg' in self.meta.columns:
-                title += f"\nDeclination: {self.meta.dec_deg.item():.05f}"
-
-            title += f"\nEpochs: {self.epochs}"
-            plt.title(title, loc="left", fontsize=10)
-            plt.suptitle(suptitle, fontsize=14)
-            plt.xlabel("Frequemcy")
-            plt.ylabel("Power")
-            plt.grid()
-
-            if savefile:
-                plt.savefig(savefile)
-            else:
-                plt.show()
-        return frequency, power
+        plt.grid()

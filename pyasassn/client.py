@@ -24,7 +24,7 @@ class SkyPatrolClient:
         self.user_name = user
         self.password = password
         try:
-            url = "http://asassn-lb01:9006/get_schema"
+            url = "http://asassn-lb01.ifa.hawaii.edu:9006:9006/get_schema"
             url_data = requests.get(url).content
 
             schema_msg = json.loads(url_data)
