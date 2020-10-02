@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pyasassn',
-      version='0.4.6',
+      version='0.4.10',
       url="https://github.com/gonzodeveloper/bad_asas_sn/",
       author='Kyle Hart',
       author_email='kylehart@hawaii.edu',

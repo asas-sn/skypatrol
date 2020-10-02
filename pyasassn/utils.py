@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import os
 from astropy.timeseries import LombScargle
 import matplotlib.pyplot as plt
 
@@ -88,6 +89,11 @@ class LightCurveCollection(object):
     def __len__(self):
         return len(self.catalog_info)
 
+    def save(self, save_dir):
+        self.catalog_info.to_csv(os.path.join(save_dir, "index.csv"), index=False)
+        for lc in self.itercurves():
+            lc.save(os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.csv"))
+
 
 class LightCurve:
     def __init__(self, pandas_obj, meta):
@@ -103,6 +109,11 @@ class LightCurve:
             raise AttributeError("Must have 'jd'(julian date), 'mag' and 'mag_err'")
 
 
+    def save(self, path):
+        with open(path, "w+") as f:
+            f.write(f"# {self.meta.to_json(orient='records')[2:-2]}\n")
+
+        self.data.to_csv(path, mode='a', index=False)
 
     def plot(self, figsize=(12,8), savefile=None):
 

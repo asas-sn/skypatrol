@@ -297,12 +297,14 @@ class SkyPatrolClient:
                              for id_block in tar_id_blocks]
 
             lcs = [curve for block in result_blocks for curve in block.get()]
-            lc_df = pd.concat(lcs)
-        if save_dir:
-            self.index.to_csv(os.path.join(save_dir, "index.csv"), index=False)
 
-        return LightCurveCollection(lc_df, self.index, id_col='asas_sn_id' if mongo_collection == 'phot'
-                                                                             else 'name')
+        if save_dir is not None:
+            self.index.to_csv(os.path.join(save_dir, "index.csv"), index=False)
+            return lcs
+        else:
+            lc_df = pd.concat(lcs)
+            return LightCurveCollection(lc_df, self.index, id_col='asas_sn_id' if mongo_collection == 'phot'
+                                                                                else 'name')
 
     def _query_mongo(self, id_block, mongo_collection, save_dir=None):
         """
@@ -360,11 +362,11 @@ class SkyPatrolClient:
                 phot_measurments.append(value)
 
             lightcurve_df = pd.DataFrame(phot_measurments, columns=colnames)
-            lightcurve_df[id_col] = tar_id
             lightcurve_df["cam"] = cam_ids
 
 
             if save_dir is None:
+                lightcurve_df[id_col] = tar_id
                 light_curves.append(lightcurve_df)
             else:
                 lightcurve_df.to_csv(os.path.join(save_dir, f"{tar_id}.csv"), index=False)
