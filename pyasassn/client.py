@@ -60,17 +60,15 @@ class SkyPatrolClient:
 
         # Query Flask API with SQL bytes
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_sql/{query_bytes}"
-        url_data = requests.post(url, json={'format': 'arrow'}).content
+        response = requests.post(url, json={'format': 'arrow'})
 
-        try:
-            # Server will return syntax errors
-            if url_data.decode()[:5] == 'ERROR':
-                raise SyntaxError(url_data.decode())
+        # Check response
+        if response.status_code == 400:
+            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            raise RuntimeError(error)
 
-        except UnicodeDecodeError:
-            pass
-
-        buff = pa.py_buffer(url_data)
+        # Deserialize from arrow
+        buff = pa.py_buffer(response.content)
         tar_df = pa.deserialize(buff)
         self.index = tar_df
 
@@ -130,8 +128,15 @@ class SkyPatrolClient:
 
         # Query the Flask server API for cone
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_cone/radius{radius}_ra{ra_deg}_dec{dec_deg}"
-        url_data = requests.post(url, json={'catalog': catalog, 'cols': cols, 'format': 'arrow'}).content
-        buff = pa.py_buffer(url_data)
+        response = requests.post(url, json={'catalog': catalog, 'cols': cols, 'format': 'arrow'})
+
+        # Check response
+        if response.status_code == 400:
+            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            raise RuntimeError(error)
+
+        # Deserialize from arrow
+        buff = pa.py_buffer(response.content)
         tar_df = pa.deserialize(buff)
         self.index = tar_df
 
@@ -174,6 +179,10 @@ class SkyPatrolClient:
         # Limit sources
         if catalog not in self.catalogs.keys():
             raise ValueError("invalid catalog")
+        # If catalog is master or stellar_main, default is 'asas_sn_id'
+        if catalog in ['master_list', 'stellar_main']:
+            id_col = 'asas_sn_id'
+
         # Check catalog columns
         if id_col not in list(self.catalogs[catalog]["col_names"]):
             raise ValueError("invalid column")
@@ -197,13 +206,19 @@ class SkyPatrolClient:
 
         # Query API with list (POST METHOD)
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_targets/catalog_list"
-        url_data = requests.post(url, json={'tar_ids': tar_ids,
+        response = requests.post(url, json={'tar_ids': tar_ids,
                                             'catalog': catalog,
                                             'id_col': id_col,
                                             'cols': cols,
-                                            'format': 'arrow'}).content
+                                            'format': 'arrow'})
 
-        buff = pa.py_buffer(url_data)
+        # Check response
+        if response.status_code == 400:
+            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            raise RuntimeError(error)
+
+        # Deserialize from arrow
+        buff = pa.py_buffer(response.content)
         tar_df = pa.deserialize(buff)
         self.index = tar_df
 
@@ -257,9 +272,15 @@ class SkyPatrolClient:
 
         # Query API with list (POST METHOD)
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_targets/random_{n}"
-        url_data = requests.post(url, json={'catalog': catalog, 'cols': cols, 'format': 'arrow'}).content
+        response = requests.post(url, json={'catalog': catalog, 'cols': cols, 'format': 'arrow'})
 
-        buff = pa.py_buffer(url_data)
+        # Check response
+        if response.status_code == 400:
+            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            raise RuntimeError(error)
+
+        # Deserialize from arrow
+        buff = pa.py_buffer(response.content)
         tar_df = pa.deserialize(buff)
 
         self.index = tar_df
