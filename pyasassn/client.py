@@ -64,7 +64,7 @@ class SkyPatrolClient:
 
         # Check response
         if response.status_code == 400:
-            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            error = json.loads(response.content)['error_text']
             raise RuntimeError(error)
 
         # Deserialize from arrow
@@ -132,7 +132,7 @@ class SkyPatrolClient:
 
         # Check response
         if response.status_code == 400:
-            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            error = json.loads(response.content)['error_text']
             raise RuntimeError(error)
 
         # Deserialize from arrow
@@ -214,7 +214,7 @@ class SkyPatrolClient:
 
         # Check response
         if response.status_code == 400:
-            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            error = json.loads(response.content)['error_text']
             raise RuntimeError(error)
 
         # Deserialize from arrow
@@ -276,7 +276,7 @@ class SkyPatrolClient:
 
         # Check response
         if response.status_code == 400:
-            error = re.findall(r'(?<=<p>).*(?=</p>)', response.content.decode())[-1]
+            error = json.loads(response.content)['error_text']
             raise RuntimeError(error)
 
         # Deserialize from arrow
