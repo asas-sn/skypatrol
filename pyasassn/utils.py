@@ -56,6 +56,7 @@ class InputCatalogs(object):
     def catalog_names(self):
         """
         Get all the names of our available input catalogs
+
         :return: names of all input catalogs (list)
         """
         return self.__dict__.keys()
@@ -80,6 +81,7 @@ class LightCurveCollection(object):
     def apply_function(self, func, col='mag', include_non_det=False):
         """
         Apply a custom aggregate function to all light curves in the collection.
+
         :param func: custom aggregate function
         :param col: column to apply aggregate function; defaluts to 'mag'
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
@@ -96,6 +98,7 @@ class LightCurveCollection(object):
         """
         Calculate simple aggregate statistics on the collection.
         Gets the mean and stddev magnitude for each curve as well as the total number of epochs observed.
+
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: pandas Dataframe with results
         """
@@ -126,6 +129,7 @@ class LightCurveCollection(object):
     def itercurves(self):
         """
         Generator to iterate through all light curves in the collection.
+
         :return: a generator that iterates over the collection
         """
         for key, data in self.data.groupby(self.id_col):
@@ -139,6 +143,7 @@ class LightCurveCollection(object):
     def save(self, save_dir):
         """
         Saves entire light curve collection to a given directory.
+
         :param save_dir: directory name
         :return: void
         """
@@ -168,6 +173,7 @@ class LightCurve:
     def save(self, filename):
         """
         Save the light curve to csv.
+
         :param filename: filename to save this light curve.
         :return: void
         """
@@ -179,6 +185,7 @@ class LightCurve:
     def plot(self, figsize=(12,8), savefile=None):
         """
         Plots the given light curve with error bars.
+
         :param figsize: size of the plot.
         :param savefile: file name to save the plot; if None plot will be directly displayed
         :return: void
@@ -216,44 +223,35 @@ class LightCurve:
         """
         Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
         light curve. Default values work for most variable sources.
-        :param fit_mean: if True, include a constant offset as part of the model at each frequency.
-        This can lead to more accurate results, especially in the case of incomplete phase coverage.
-        :param center_data: if True, pre-center the data by subtracting the weighted mean of the input data.
-        This is especially important if fit_mean = False
+
+        :param fit_mean: if True, include a constant offset as part of the model at each frequency. This can lead to more accurate results, especially in the case of incomplete phase coverage.
+        :param center_data: if True, pre-center the data by subtracting the weighted mean of the input data. This is especially important if fit_mean = False
         :param nterms: number of terms to use in the Fourier fit
         :param normalization: Normalization to use for the periodogram.
-        :param minimum_frequency: If specified, then use this minimum frequency rather
-        than one chosen based on the size of the baseline.
-        :param maximum_frequency:If specified, then use this maximum frequency rather than
-        one chosen based on the average nyquist frequency.
-        :param method:specify the lomb scargle implementation to use. Options are:
+        :param minimum_frequency: If specified, then use this minimum frequency rather than one chosen based on the size of the baseline.
+        :param maximum_frequency: If specified, then use this maximum frequency rather than one chosen based on the average nyquist frequency.
+        :param method: specify the lomb scargle implementation to use. Options are:
 
-            ‘auto’: choose the best method based on the input
+            -  ‘auto’: choose the best method based on the input
 
-            ‘fast’: use the O[N log N] fast method. Note that this requires evenly-spaced
-            frequencies: by default this will be checked unless assume_regular_frequency is set to True.
+            -  ‘fast’: use the O[N log N] fast method. Note that this requires evenly-spaced frequencies: by default this will be checked unless assume_regular_frequency is set to True.
 
-            ‘slow’: use the O[N^2] pure-python implementation
+            -  ‘slow’: use the O[N^2] pure-python implementation
 
-            ‘cython’: use the O[N^2] cython implementation.
-            This is slightly faster than method=’slow’, but much more memory efficient.
+            -  ‘cython’: use the O[N^2] cython implementation. This is slightly faster than method=’slow’, but much more memory efficient.
 
-            ‘chi2’: use the O[N^2] chi2/linear-fitting implementation
+            -  ‘chi2’: use the O[N^2] chi2/linear-fitting implementation
 
-            ‘fastchi2’: use the O[N log N] chi2 implementation.
-            Note that this requires evenly-spaced frequencies: by default this will be checked
-            unless assume_regular_frequency is set to True.
+            -  ‘fastchi2’: use the O[N log N] chi2 implementation. Note that this requires evenly-spaced frequencies: by default this will be checked unless assume_regular_frequency is set to True.
 
-            ‘scipy’: use scipy.signal.lombscargle, which is an O[N^2] implementation written in C.
-            Note that this does not support heteroskedastic errors.
+            -  ‘scipy’: use scipy.signal.lombscargle, which is an O[N^2] implementation written in C. Note that this does not support heteroskedastic errors.
 
         :param samples_per_peak: The approximate number of desired samples across the typical peak
-        :param nyquist_factor: The multiple of the average nyquist frequency used to choose the maximum frequency
-        if maximum_frequency is not provided.
+        :param nyquist_factor: The multiple of the average nyquist frequency used to choose the maximum frequency if maximum_frequency is not provided.
         :param plot: if True, then the function also produces a plot of the power spectrum.
         :param figsize: size of the plot.
         :param savefile: file name to save the plot; if None plot will be directly displayed
-        :return: power, frequencym and the astropy LombScargle object
+        :return: power, frequency and the astropy LombScargle object
         """
 
         # Don't count nondetections
@@ -290,8 +288,8 @@ class LightCurve:
     def find_period(self, frequency, power, best_frequency=None, plot=True, figsize=(12,8), savefile=None):
         """
         Find the period of the light curve given the power spectrum produced by lomb_scargle.
-
         Also produces a phase-folded plot of the light curve.
+
         :param frequency: frequency from lomb_scargle()
         :param power: power from lomb_scargle()
         :param best_frequency: peak frequency for phase folding the light curve
