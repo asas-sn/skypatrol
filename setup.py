@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pyasassn',
-      version='0.4.12',
+      version='0.5.1',
       url="https://github.com/asas_sn/skypatrol/",
       author='Kyle Hart',
       author_email='kylehart@hawaii.edu',

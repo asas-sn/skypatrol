@@ -24,17 +24,24 @@ def _arc_to_deg(arc, unit):
 def _block_arr(arr, size):
     return [arr[i:i + size] for i in range(0, len(arr), size)]
 
-class Catalog(object):
+class InputCatalogs(object):
+    """
+    Data structure for holding metadata on ASAS-SN Sky Patrol's input catalogs.
 
-    def __init__(self, schema_msg):
-        for name, col_data in schema_msg.items():
+    Stores input catalog names as well as their searchable columns and total number of targets.
+    """
+
+    def __init__(self, schema, counts):
+        for name, col_data in schema.items():
             self.__dict__[name] = pd.DataFrame(col_data)
+            self.counts = counts
 
     def __str__(self):
         rep_str = "\n"
         for table_name, df in self.__dict__.items():
-            rep_str += f"Table Name: {table_name}\n" \
+            rep_str += f"Table Name:  {table_name}\n" \
                        f"Num Columns: {len(df.index)}\n" \
+                       f"Num Targets: {self.counts[table_name]}" \
                        f"{df.head(10)}\n\n"
         return rep_str
 
@@ -42,20 +49,27 @@ class Catalog(object):
         rep_str = "\n"
         for table_name, df in self.__dict__.items():
             rep_str += f"Table Name: {table_name}\n" \
-                       f"Num Columns: {len(df.index)}\n\n"
+                       f"Num Columns: {len(df.index)}\n" \
+                       f"Num Targets: {self.counts[table_name]}\n\n"
         return rep_str
 
-    def keys(self):
+    def catalog_names(self):
+        """
+        Get all the names of our available input catalogs
+        :return: names of all input catalogs (list)
+        """
         return self.__dict__.keys()
 
-    def values(self):
-        return self.__dict__.values()
 
     def __getitem__(self, item):
         return self.__dict__[item]
 
 
 class LightCurveCollection(object):
+    """
+    Object for storing and analysing ASAS-SN Sky Patrol light curves.
+    Returned by any SkyPatrolClient query where download=True
+    """
 
     def __init__(self, data, catalog_info, id_col):
 
@@ -64,6 +78,13 @@ class LightCurveCollection(object):
         self.catalog_info = catalog_info
 
     def apply_function(self, func, col='mag', include_non_det=False):
+        """
+        Apply a custom aggregate function to all light curves in the collection.
+        :param func: custom aggregate function
+        :param col: column to apply aggregate function; defaluts to 'mag'
+        :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
+        :return: pandas Dataframe with results
+        """
         if include_non_det:
             data = self.data
         else:
@@ -72,6 +93,12 @@ class LightCurveCollection(object):
         return data.groupby(self.id_col).agg({col: func})
 
     def stats(self, include_non_det=False):
+        """
+        Calculate simple aggregate statistics on the collection.
+        Gets the mean and stddev magnitude for each curve as well as the total number of epochs observed.
+        :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
+        :return: pandas Dataframe with results
+        """
         if include_non_det:
             data = self.data
         else:
@@ -97,6 +124,10 @@ class LightCurveCollection(object):
 
 
     def itercurves(self):
+        """
+        Generator to iterate through all light curves in the collection.
+        :return: a generator that iterates over the collection
+        """
         for key, data in self.data.groupby(self.id_col):
             source = self.catalog_info[self.id_col] == key
             meta = self.catalog_info[source]
@@ -106,13 +137,22 @@ class LightCurveCollection(object):
         return len(self.catalog_info)
 
     def save(self, save_dir):
+        """
+        Saves entire light curve collection to a given directory.
+        :param save_dir: directory name
+        :return: void
+        """
         self.catalog_info.to_csv(os.path.join(save_dir, "index.csv"), index=False)
         for lc in self.itercurves():
             lc.save(os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.csv"))
 
 
 class LightCurve:
+    """
+    Object for analysing and visualizing ASAS-SN Sky Patrol light curves.
+    """
     def __init__(self, pandas_obj, meta):
+
         self._validate(pandas_obj)
         self.data = pandas_obj
         self.meta = meta
@@ -125,13 +165,24 @@ class LightCurve:
             raise AttributeError("Must have 'jd'(julian date), 'mag' and 'mag_err'")
 
 
-    def save(self, path):
-        with open(path, "w+") as f:
+    def save(self, filename):
+        """
+        Save the light curve to csv.
+        :param filename: filename to save this light curve.
+        :return: void
+        """
+        with open(filename, "w+") as f:
             f.write(f"# {self.meta.to_json(orient='records')[2:-2]}\n")
 
-        self.data.to_csv(path, mode='a', index=False)
+        self.data.to_csv(filename, mode='a', index=False)
 
     def plot(self, figsize=(12,8), savefile=None):
+        """
+        Plots the given light curve with error bars.
+        :param figsize: size of the plot.
+        :param savefile: file name to save the plot; if None plot will be directly displayed
+        :return: void
+        """
 
         errors = self.data.mag_err > 99
         plt.figure(figsize=figsize)
@@ -146,7 +197,7 @@ class LightCurve:
                      fmt="v",
                      c="red",
                      label="non-detections")
-        self.label_plots()
+        self._label_plots()
         plt.legend()
         plt.xlabel("Date (JD-2450000)")
         plt.ylabel("Magnitude")
@@ -162,6 +213,48 @@ class LightCurve:
     def lomb_scargle(self, fit_mean=True, center_data=True, nterms=1, normalization='standard',
                      minimum_frequency=0.001, maximum_frequency=25, method='auto', samples_per_peak=5,
                      nyquist_factor=5, plot=True, figsize=(12,8), savefile=None):
+        """
+        Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
+        light curve. Default values work for most variable sources.
+        :param fit_mean: if True, include a constant offset as part of the model at each frequency.
+        This can lead to more accurate results, especially in the case of incomplete phase coverage.
+        :param center_data: if True, pre-center the data by subtracting the weighted mean of the input data.
+        This is especially important if fit_mean = False
+        :param nterms: number of terms to use in the Fourier fit
+        :param normalization: Normalization to use for the periodogram.
+        :param minimum_frequency: If specified, then use this minimum frequency rather
+        than one chosen based on the size of the baseline.
+        :param maximum_frequency:If specified, then use this maximum frequency rather than
+        one chosen based on the average nyquist frequency.
+        :param method:specify the lomb scargle implementation to use. Options are:
+
+            ‘auto’: choose the best method based on the input
+
+            ‘fast’: use the O[N log N] fast method. Note that this requires evenly-spaced
+            frequencies: by default this will be checked unless assume_regular_frequency is set to True.
+
+            ‘slow’: use the O[N^2] pure-python implementation
+
+            ‘cython’: use the O[N^2] cython implementation.
+            This is slightly faster than method=’slow’, but much more memory efficient.
+
+            ‘chi2’: use the O[N^2] chi2/linear-fitting implementation
+
+            ‘fastchi2’: use the O[N log N] chi2 implementation.
+            Note that this requires evenly-spaced frequencies: by default this will be checked
+            unless assume_regular_frequency is set to True.
+
+            ‘scipy’: use scipy.signal.lombscargle, which is an O[N^2] implementation written in C.
+            Note that this does not support heteroskedastic errors.
+
+        :param samples_per_peak: The approximate number of desired samples across the typical peak
+        :param nyquist_factor: The multiple of the average nyquist frequency used to choose the maximum frequency
+        if maximum_frequency is not provided.
+        :param plot: if True, then the function also produces a plot of the power spectrum.
+        :param figsize: size of the plot.
+        :param savefile: file name to save the plot; if None plot will be directly displayed
+        :return: power, frequencym and the astropy LombScargle object
+        """
 
         # Don't count nondetections
         errors = self.data.mag_err > 99
@@ -184,7 +277,7 @@ class LightCurve:
             plt.figure(figsize=figsize)
 
             plt.plot(frequency, power)
-            self.label_plots()
+            self._label_plots()
             plt.xlabel("Frequemcy")
             plt.ylabel("Power")
 
@@ -195,8 +288,20 @@ class LightCurve:
         return frequency, power, ls
 
     def find_period(self, frequency, power, best_frequency=None, plot=True, figsize=(12,8), savefile=None):
+        """
+        Find the period of the light curve given the power spectrum produced by lomb_scargle.
 
-        # Don't count nondetections
+        Also produces a phase-folded plot of the light curve.
+        :param frequency: frequency from lomb_scargle()
+        :param power: power from lomb_scargle()
+        :param best_frequency: peak frequency for phase folding the light curve
+        :param plot: if True, then the function also produces a plot of the phase-folded light curve.
+        :param figsize: size of the plot.
+        :param savefile: file name to save the plot; if None plot will be directly displayed
+        :return: period of the light curve
+        """
+
+        # Don't count non-detections
         errors = self.data.mag_err > 99
         jd = self.data[~errors].jd
         mag = self.data[~errors].mag
@@ -216,7 +321,7 @@ class LightCurve:
 
             plt.figure(figsize=figsize)
             plt.scatter(x, y)
-            self.label_plots()
+            self._label_plots()
             plt.xlabel("Phase")
             plt.ylabel("Magnitude")
             plt.gca().invert_yaxis()
@@ -230,7 +335,7 @@ class LightCurve:
 
 
 
-    def label_plots(self):
+    def _label_plots(self):
         suptitle = ""
         title = ""
         if 'asas_sn_id' in self.meta.columns:

@@ -7,19 +7,22 @@ import numpy as np
 from multiprocessing import Pool
 import re
 import pyarrow as pa
-from .utils import LightCurveCollection, _block_arr, _arc_to_deg, Catalog
+from .utils import LightCurveCollection, _block_arr, _arc_to_deg, InputCatalogs
 
 
 class SkyPatrolClient:
+    """
+            The SkyPatrolClient allows users to interact with the ASAS-SN Sky Patrol photometry database.
+        This client enables users to use ADQL, cone searches, random samples, and catalog ID lookups on the input catalogs.
 
-
-    def __init__(self, user, password):
-        """
-        The SkyPatrolClient allows users to interact with the ASAS-SN Skypatrol photometry database.
-        This client enables users to use ADQL, conesearches, and catalog ID searches on the input catalogs.
         Queries to the input catalogs will either be returned as pandas DataFrames containing aggregate information
         on astronomical targets, or they will be returned as LightCurveCollections containing photometry data from all
         queried targets.
+    """
+
+    def __init__(self, user, password):
+        """
+        Creates SkyPatrolClient object
         :param user: username to interact with the light curve database; string.
         :param password: password to interact with the light curve database; string.
         """
@@ -29,29 +32,35 @@ class SkyPatrolClient:
         try:
             url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_schema"
             url_data = requests.get(url).content
+            schema = json.loads(url_data)
 
-            schema_msg = json.loads(url_data)
+            url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_counts"
+            url_data = requests.get(url).content
+            counts = json.loads(url_data)
 
-            self.catalogs = Catalog(schema_msg)
+            self.catalogs = InputCatalogs(schema, counts)
 
         except ConnectionError as e:
             raise ConnectionError("Unable to connect to ASAS-SN Servers")
 
-    def adql_query(self, query_str, mode='index', threads=1):
+    def adql_query(self, query_str, download=False, threads=1):
         """
-        Query the ASAS-SN SkyPatrol Input Catalogs with an ADQL string.
+        Query the ASAS-SN Sky Patrol Input Catalogs with an ADQL string.
         See README.md for more on accepted ADQL context and functions.
 
         :param query_str: ADQL query string
-        :param mode:
-                    'index': queries input catalogs for information on targets
-                    'download_curves': pulls light curves from server.
+        :param download: return full light curves if True, return catalog information if False
         :param threads: number of real threads to use for pulling light curves from server.
-        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
+        :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
+                else LightCurveCollection
         """
         # Check inputs
-        if mode not in ['index', 'download_curves']:
-            raise ValueError("mode must be 'index', or 'download_curves")
+        if type(download) is not bool:
+            raise ValueError("'download' must be boolean value")
+        if type(threads) is not int:
+            raise ValueError("'threads' must be integer value")
+        if type(query_str) is not str:
+            raise ValueError("'query_str' must me string value")
 
         # Trim ADQL input
         query_str = re.sub(' +', ' ', query_str).replace("\n", "")
@@ -71,17 +80,17 @@ class SkyPatrolClient:
         tar_df = pa.deserialize(buff)
         self.index = tar_df
 
-        if mode == 'index':
+        if download is False:
             return tar_df
 
-        elif mode == 'download_curves':
+        else:
             tar_ids = list(tar_df['asas_sn_id'])
             return self._get_curves(tar_ids, "extrasolar", threads)
 
     def cone_search(self, ra_deg, dec_deg, radius, units='deg', catalog='master_list', cols=None,
-                    mode='index',  threads=1):
+                    download=False,  threads=1):
         """
-        Query the ASAS-SN SkyPatrol Input Catalogs for all targets within a cone of the sky.
+        Query the ASAS-SN Sky Patrol Input Catalogs for all targets within a cone of the sky.
         Does NOT return solar system targets (i.e. asteroids and coma).
 
         :param ra_deg: right ascension of cone.
@@ -96,16 +105,17 @@ class SkyPatrolClient:
         :param catalog: which catalog are we searching
         :param cols: columns to return from the given input catalog;
                      if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
-        :param mode:
-                    'index': queries input catalogs for information on targets
-                    'download_curves': pulls light curves from server.
+        :param download: return full light curves if True, return catalog information if False
         :param threads: number of real threads to use for pulling light curves from server.
-        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
+        :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
+                else LightCurveCollection
         """
         # Check inputs
-        if mode not in ['index', 'download_curves']:
-            raise ValueError("mode must be 'index' OR 'download_curves")
-        if catalog not in self.catalogs.keys() or catalog in ['asteroids', 'comets']:
+        if type(download) is not bool:
+            raise ValueError("'download' must be boolean value")
+        if type(threads) is not int:
+            raise ValueError("'threads' must be integer value")
+        if catalog not in self.catalogs.catalog_names() or catalog in ['asteroids', 'comets']:
             raise ValueError("invalid catalog")
         if cols is None:
             cols = ['asas_sn_id', 'ra_deg', 'dec_deg']
@@ -134,20 +144,22 @@ class SkyPatrolClient:
         tar_df = pa.deserialize(buff)
         self.index = tar_df
 
-        if mode == 'index':
+        if download is False:
             return tar_df
 
-        elif mode == 'download_curves':
+        else:
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
             return self._get_curves(tar_ids, catalog, threads)
 
-    def query_list(self, tar_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, mode='index', threads=1):
+    def query_list(self, tar_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, download=False, threads=1):
         """
-        Query the ASAS-SN SkyPatrol Input Catalogs for all targets with the given identifiers.
+        Query the ASAS-SN Sky Patrol Input Catalogs for all targets with the given identifiers.
         to view the available list of catalogs and identifiers see SkyPatrolClient.catalogs.
+
         Most of our astronomical targets are in the stellar_main catalog, which has been pre-crossmatched to GaiaDR2,
         ATLAS Refcat2, SDSS, AllWISE, and Tess Input Catalog (TIC v8).
+
         Thus searching for light curves with a list of Gaia IDs would require catalog='stellar_main', id_col='gaia_id'.
         Our other input catalogs should be searched with id_col='name', or by columns giving alternative ids.
 
@@ -156,17 +168,18 @@ class SkyPatrolClient:
         :param catalog: which catalog are we searching
         :param cols: columns to return from the given input catalog;
                      if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
-        :param mode:
-                    'index': queries input catalogs for information on targets
-                    'download_curves': pulls light curves from server.
+        :param download: return full light curves if True, return catalog information if False
         :param threads: number of real threads to use for pulling light curves from server.
-        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
+        :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
+                else LightCurveCollection
         """
         # Check inputs
-        if mode not in ['index', 'download_curves']:
-            raise ValueError("mode must be 'index', 'load_curves'. or 'download_curves")
+        if type(download) is not bool:
+            raise ValueError("'download' must be boolean value")
+        if type(threads) is not int:
+            raise ValueError("'threads' must be integer value")
         # Limit sources
-        if catalog not in self.catalogs.keys():
+        if catalog not in self.catalogs.catalog_names():
             raise ValueError("invalid catalog")
         # If catalog is master or stellar_main, default is 'asas_sn_id'
         if catalog in ['master_list', 'stellar_main']:
@@ -211,33 +224,34 @@ class SkyPatrolClient:
         tar_df = pa.deserialize(buff)
         self.index = tar_df
 
-        if mode == 'index':
+        if download is False:
             return tar_df
 
-        elif mode == 'download_curves':
+        else:
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
             return self._get_curves(tar_ids, catalog, threads)
 
-    def random_sample(self, n, catalog='master_list', cols=None, mode='index', threads=1):
+    def random_sample(self, n, catalog='master_list', cols=None, download=False, threads=1):
         """
-        Get n random targets from the ASAS-SN SkyPatrol Input Catalogs.
+        Get n random targets from the ASAS-SN Sky Patrol Input Catalogs.
 
         :param n: number of targets to randomly sample
         :param catalog: which catalog are we searching
         :param cols: columns to return from the given input catalog;
                      if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
-        :param mode:
-                    'index': queries input catalogs for information on targets
-                    'download_curves': pulls light curves from server.
+        :param download: return full light curves if True, return catalog information if False
         :param threads: number of real threads to use for pulling light curves from server.
-        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
+        :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
+                else LightCurveCollection
         """
-        # Valid modes
-        if mode not in ['index', 'download_curves']:
-            raise ValueError("mode must be 'index', 'download_curves'. or 'download_curves")
+        # Check inputs
+        if type(download) is not bool:
+            raise ValueError("'download' must be boolean value")
+        if type(threads) is not int:
+            raise ValueError("'threads' must be integer value")
         # Valid catalogs
-        if catalog not in self.catalogs.keys():
+        if catalog not in self.catalogs.catalog_names():
             raise ValueError("invalid catalog")
         # Set default columns
         if cols is None and catalog not in ['asteroids', 'comets']:
@@ -268,13 +282,12 @@ class SkyPatrolClient:
         # Deserialize from arrow
         buff = pa.py_buffer(response.content)
         tar_df = pa.deserialize(buff)
-
         self.index = tar_df
 
-        if mode == 'index':
+        if download is False:
             return tar_df
 
-        elif mode == 'download_curves':
+        else:
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
             return self._get_curves(tar_ids, catalog, threads)
