@@ -38,7 +38,7 @@ class SkyPatrolClient:
             url_data = requests.get(url).content
             counts = json.loads(url_data)
 
-            self.catalogs = InputCatalogs(schema, counts)
+            self.catalogs = SkyPatrolClient.InputCatalogs(schema, counts)
 
         except ConnectionError as e:
             raise ConnectionError("Unable to connect to ASAS-SN Servers")
@@ -381,13 +381,15 @@ class SkyPatrolClient:
         def __init__(self, schema, counts):
             for name, col_data in schema.items():
                 self.__dict__[name] = pd.DataFrame(col_data)
-                self.counts = counts
+            self.counts = counts
 
         def __str__(self):
             rep_str = "\n"
             for table_name, df in self.__dict__.items():
+                if table_name == 'counts':
+                    continue
                 rep_str += f"Table Name:  {table_name}\n" \
-                           f"Num Columns: {len(df.index)}\n" \
+                           f"Num Columns: {len(df)}\n" \
                            f"Num Targets: {self.counts[table_name]}" \
                            f"{df.head(10)}\n\n"
             return rep_str
@@ -395,8 +397,10 @@ class SkyPatrolClient:
         def __repr__(self):
             rep_str = "\n"
             for table_name, df in self.__dict__.items():
-                rep_str += f"Table Name: {table_name}\n" \
-                           f"Num Columns: {len(df.index)}\n" \
+                if table_name == 'counts':
+                    continue
+                rep_str += f"Table Name:  {table_name}\n" \
+                           f"Num Columns: {len(df)}\n" \
                            f"Num Targets: {self.counts[table_name]}\n\n"
             return rep_str
 
