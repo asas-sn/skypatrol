@@ -24,48 +24,6 @@ def _arc_to_deg(arc, unit):
 def _block_arr(arr, size):
     return [arr[i:i + size] for i in range(0, len(arr), size)]
 
-class InputCatalogs(object):
-    """
-    Data structure for holding metadata on ASAS-SN Sky Patrol's input catalogs.
-
-    Stores input catalog names as well as their searchable columns and total number of targets.
-    """
-
-    def __init__(self, schema, counts):
-        for name, col_data in schema.items():
-            self.__dict__[name] = pd.DataFrame(col_data)
-            self.counts = counts
-
-    def __str__(self):
-        rep_str = "\n"
-        for table_name, df in self.__dict__.items():
-            rep_str += f"Table Name:  {table_name}\n" \
-                       f"Num Columns: {len(df.index)}\n" \
-                       f"Num Targets: {self.counts[table_name]}" \
-                       f"{df.head(10)}\n\n"
-        return rep_str
-
-    def __repr__(self):
-        rep_str = "\n"
-        for table_name, df in self.__dict__.items():
-            rep_str += f"Table Name: {table_name}\n" \
-                       f"Num Columns: {len(df.index)}\n" \
-                       f"Num Targets: {self.counts[table_name]}\n\n"
-        return rep_str
-
-    def catalog_names(self):
-        """
-        Get all the names of our available input catalogs
-
-        :return: names of all input catalogs (list)
-        """
-        return self.__dict__.keys()
-
-
-    def __getitem__(self, item):
-        return self.__dict__[item]
-
-
 class LightCurveCollection(object):
     """
     Object for storing and analysing ASAS-SN Sky Patrol light curves.
