@@ -5,7 +5,7 @@ from astropy.timeseries import LombScargle
 import matplotlib.pyplot as plt
 
 
-def block_arr(arr, size):
+def _block_arr(arr, size):
     return [arr[i:i + size] for i in range(0, len(arr), size)]
 
 class Catalog(object):

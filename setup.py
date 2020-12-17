@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(name='pyasassn',
       version='0.4.12',
-      url="https://github.com/gonzodeveloper/bad_asas_sn/",
+      url="https://github.com/asas_sn/skypatrol/",
       author='Kyle Hart',
       author_email='kylehart@hawaii.edu',
       license='GPL v.3',

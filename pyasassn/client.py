@@ -7,7 +7,7 @@ import numpy as np
 from multiprocessing import Pool
 import re
 import pyarrow as pa
-from .utils import LightCurveCollection, block_arr, Catalog
+from .utils import LightCurveCollection, _block_arr, Catalog
 
 
 class SkyPatrolClient:
@@ -20,6 +20,15 @@ class SkyPatrolClient:
                         'fwhm': "pixels"}
 
     def __init__(self, user, password):
+        """
+        The SkyPatrolClient allows users to interact with the ASAS-SN Skypatrol photometry database.
+        This client enables users to use ADQL, conesearches, and catalog ID searches on the input catalogs.
+        Queries to the input catalogs will either be returned as pandas DataFrames containing aggregate information
+        on astronomical targets, or they will be returned as LightCurveCollections containing photometry data from all
+        queried targets.
+        :param user: username to interact with the light curve database; string.
+        :param password: password to interact with the light curve database; string.
+        """
         self.index = None
         self.user_name = user
         self.password = password
@@ -34,27 +43,23 @@ class SkyPatrolClient:
         except ConnectionError as e:
             raise ConnectionError("Unable to connect to ASAS-SN Servers")
 
-    def adql_query(self, query_str, mode='index', save_dir=None, threads=1):
+    def adql_query(self, query_str, mode='index', threads=1):
         """
-        Query the BAD Lookup Table with a SQL string.
-        See README.md for more on accepted SQL context and functions.
+        Query the ASAS-SN SkyPatrol Input Catalogs with an ADQL string.
+        See README.md for more on accepted ADQL context and functions.
 
-        :param query_str: SQL query string
-        :param mode: specify query return.
-                    'index': returns dataframe containing ra, dec, and target ids for all results.
-                    'download_curves': pulls light curves from server, either into memory or written to disk.
-        :param save_dir: if 'mode' is set to 'download_curves' then this can be set to a directory to save all light curves
-                                returns list of filenames for saved light curves (all csv)
-                         else if this is left as None while 'mode' is set to 'load curves', then sql_query will
-                                return a dataframe containing phot measurements for all targets retrieved
-                                hint~ group by 'id' to get individual curves
+        :param query_str: ADQL query string
+        :param mode:
+                    'index': queries input catalogs for information on targets
+                    'download_curves': pulls light curves from server.
         :param threads: number of real threads to use for pulling light curves from server.
-        :return: 'mode' dependent
+        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
         """
         # Check inputs
         if mode not in ['index', 'download_curves']:
             raise ValueError("mode must be 'index', or 'download_curves")
 
+        # Trim ADQL input
         query_str = re.sub(' +', ' ', query_str).replace("\n", "")
         query_bytes = encodebytes(bytes(query_str, encoding='utf-8')).decode()
 
@@ -77,36 +82,31 @@ class SkyPatrolClient:
 
         elif mode == 'download_curves':
             tar_ids = list(tar_df['asas_sn_id'])
-            return self._get_curves(tar_ids, "extrasolar", threads, save_dir)
+            return self._get_curves(tar_ids, "extrasolar", threads)
 
     def cone_search(self, ra_deg, dec_deg, radius, units='deg', catalog='master_list', cols=None,
-                    mode='index', save_dir=None, threads=1):
+                    mode='index',  threads=1):
         """
-        Query the BAD Lookup Table for all targets within a cone of the sky.
+        Query the ASAS-SN SkyPatrol Input Catalogs for all targets within a cone of the sky.
         Does NOT return solar system targets (i.e. asteroids and coma).
 
         :param ra_deg: right ascension of cone.
-                       accepts degree/decimal as float
+                       accepts degree-decimal (float) or HH:MM:SS(.SS) sexagesimal (string)
         :param dec_deg: declination of cone.
-                        accepts degree/decimal as float
+                        accepts degree/decimal as float or DD:MM:SS(.SS) sexagesimal (string)
         :param radius: radius in degrees of cone, float
         :param units: units for cone radius.
                      'deg': degree decimal
                      'arcmin': arcminutes
                      'arcsec' arcseconds
         :param catalog: which catalog are we searching
-        :param cols: columns to return from the BAD Lookup Table, if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
-        :param mode: specify cone_search return.
-                    'index': returns dataframe containing ra, dec, and target ids for all results.
-                    'download_curves': pulls light curves from server, either into memory or written to disk.
-        :param save_dir: if 'mode' is set to 'download_curves' then this can be set to a directory to save all light curves
-                                returns list of filenames for saved light curves (all csv)
-                         else if this is left as None while 'mode' is set to 'load curves', then cone_search will
-                                return a dataframe containing phot measurements for all targets retrieved
-                                hint~ group by 'id' to get individual curves
+        :param cols: columns to return from the given input catalog;
+                     if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
+        :param mode:
+                    'index': queries input catalogs for information on targets
+                    'download_curves': pulls light curves from server.
         :param threads: number of real threads to use for pulling light curves from server.
-
-        :return: 'mode' dependent
+        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
         """
         # Check inputs
         if mode not in ['index', 'download_curves']:
@@ -124,7 +124,7 @@ class SkyPatrolClient:
 
         # Change units
         if units != "deg":
-            radius = SkyPatrolClient.arc_to_deg(np.float(radius), units)
+            radius = SkyPatrolClient._arc_to_deg(np.float(radius), units)
 
         # Query the Flask server API for cone
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_cone/radius{radius}_ra{ra_deg}_dec{dec_deg}"
@@ -146,32 +146,27 @@ class SkyPatrolClient:
         elif mode == 'download_curves':
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
-            return self._get_curves(tar_ids, catalog, threads, save_dir)
+            return self._get_curves(tar_ids, catalog, threads)
 
-    def query_list(self, tar_ids, catalog, id_col='name', cols=None, mode='index', save_dir=None, threads=1):
+    def query_list(self, tar_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, mode='index', threads=1):
         """
-        Query the BAD Lookup Table for all targets with the given ids.
-        Available Catalogs: GaiaDR2, Tess Input Catalog (TIC), ATLAS Refcat, Allwise, and SDSS.
+        Query the ASAS-SN SkyPatrol Input Catalogs for all targets with the given identifiers.
+        to view the available list of catalogs and identifiers see SkyPatrolClient.catalogs.
+        Most of our astronomical targets are in the stellar_main catalog, which has been pre-crossmatched to GaiaDR2,
+        ATLAS Refcat2, SDSS, AllWISE, and Tess Input Catalog (TIC v8).
+        Thus searching for light curves with a list of Gaia IDs would require catalog='stellar_main', id_col='gaia_id'.
+        Our other input catalogs should be searched with id_col='name', or by columns giving alternative ids.
 
-        :param tar_ids: list of target ids for query
-        :param source: source catalog of the targets,
-                       accepts 'asas_sn' for asas_sn internal id's.
-                               'gaia' for GaiaDR2
-                               'tic' for TESS input catalog
-                               'refcat' for ATLAS Refcat
-                               'allwise' for Allwise
-                               'sdss' for SDSS
-        :param cols: columns to return from the BAD Lookup Table, if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
-        :param mode: specify query return.
-                    'index': returns dataframe containing ra, dec, and target ids for all results.
-                    'download_curves': pulls light curves from server, either into memory or written to disk.
-        :param save_dir: if 'mode' is set to 'download_curves' then this can be set to a directory to save all light curves
-                                returns list of filenames for saved light curves (all csv)
-                         else if this is left as None while 'mode' is set to 'load curves', then sql_query will
-                                return a dataframe containing phot measurements for all targets retrieved
-                                hint~ group by 'id' to get individual curves
+        :param tar_ids: list of target ids for query; list
+        :param id_col: the column on the given catalog to search against; string
+        :param catalog: which catalog are we searching
+        :param cols: columns to return from the given input catalog;
+                     if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
+        :param mode:
+                    'index': queries input catalogs for information on targets
+                    'download_curves': pulls light curves from server.
         :param threads: number of real threads to use for pulling light curves from server.
-        :return: 'mode' dependent
+        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
         """
         # Check inputs
         if mode not in ['index', 'download_curves']:
@@ -228,24 +223,21 @@ class SkyPatrolClient:
         elif mode == 'download_curves':
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
-            return self._get_curves(tar_ids, catalog, threads, save_dir)
+            return self._get_curves(tar_ids, catalog, threads)
 
-    def random_sample(self, n, catalog='master_list', cols=None, mode='index', save_dir=None, threads=1):
+    def random_sample(self, n, catalog='master_list', cols=None, mode='index', threads=1):
         """
-        Get n random targets from the BAD Lookup Table
+        Get n random targets from the ASAS-SN SkyPatrol Input Catalogs.
 
         :param n: number of targets to randomly sample
-        :param cols: columns to return from the BAD Lookup Table, if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
-        :param mode: specify query return.
-                    'index': returns dataframe containing ra, dec, and target ids for all results.
-                    'download_curves': pulls light curves from server, either into memory or written to disk.
-        :param save_dir: if 'mode' is set to 'download_curves' then this can be set to a directory to save all light curves
-                                returns list of filenames for saved light curves (all csv)
-                         else if this is left as None while 'mode' is set to 'load curves', then sql_query will
-                                return a dataframe containing phot measurements for all targets retrieved
-                                hint~ group by 'ids' to get individual curves
+        :param catalog: which catalog are we searching
+        :param cols: columns to return from the given input catalog;
+                     if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
+        :param mode:
+                    'index': queries input catalogs for information on targets
+                    'download_curves': pulls light curves from server.
         :param threads: number of real threads to use for pulling light curves from server.
-        :return: 'mode' dependent
+        :return: pandas DataFrame if 'mode' = 'index'; else LightCurveCollection
         """
         # Valid modes
         if mode not in ['index', 'download_curves']:
@@ -291,17 +283,9 @@ class SkyPatrolClient:
         elif mode == 'download_curves':
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
-            return self._get_curves(tar_ids, catalog, threads, save_dir)
+            return self._get_curves(tar_ids, catalog, threads)
 
-    def _get_curves(self, tar_ids, catalog, threads=1, save_dir=None):
-        """
-        Queries BAD MongoDB for lightcurves of the target list.
-        Either returns a single dataframe with all photometry or downloads lightcurves to save_dir
-        :param threads: number or processes to use
-        :param save_dir: if None then return list of lightcurve dataframes
-                         else save lightcurves to specified directory
-        :return: list of lightcurve dataframes or list of files names
-        """
+    def _get_curves(self, tar_ids, catalog, threads=1):
         # Make sure we query correct collection
         if catalog not in ["asteroids", "comets"]:
             mongo_collection = "phot"
@@ -309,31 +293,20 @@ class SkyPatrolClient:
             mongo_collection = catalog
 
         # We will only query 1,000 docs at a time
-        tar_id_blocks = block_arr(tar_ids, 10000)
+        tar_id_blocks = _block_arr(tar_ids, 10000)
 
         # Build process pool. Each block of ids gets one worker
         with Pool(processes=threads) as pool:
             # Query one block at a time
-            result_blocks = [pool.apply_async(self._query_mongo, args=(id_block, mongo_collection, save_dir))
+            result_blocks = [pool.apply_async(self._query_mongo, args=(id_block, mongo_collection))
                              for id_block in tar_id_blocks]
 
             lcs = [curve for block in result_blocks for curve in block.get()]
-
-        if save_dir is not None:
-            self.index.to_csv(os.path.join(save_dir, "index.csv"), index=False)
-            return lcs
-        else:
             lc_df = pd.concat(lcs)
             return LightCurveCollection(lc_df, self.index, id_col='asas_sn_id' if mongo_collection == 'phot'
                                                                                 else 'name')
 
-    def _query_mongo(self, id_block, mongo_collection, save_dir=None):
-        """
-        Converts BAD_Mongo lightcurve doc into dataframe
-        Either returns the raw pandas dataframe of the light curve, or writes the lightcurve to csv
-
-        :return:
-        """
+    def _query_mongo(self, id_block, mongo_collection):
 
         # Connect Mongo Client
         client = MongoClient(f"mongodb://{self.user_name}:{self.password}"
@@ -384,19 +357,13 @@ class SkyPatrolClient:
 
             lightcurve_df = pd.DataFrame(phot_measurments, columns=colnames)
             lightcurve_df["cam"] = cam_ids
-
-
-            if save_dir is None:
-                lightcurve_df[id_col] = tar_id
-                light_curves.append(lightcurve_df)
-            else:
-                lightcurve_df.to_csv(os.path.join(save_dir, f"{tar_id}.csv"), index=False)
-                light_curves.append(f"{tar_id}.csv")
+            lightcurve_df[id_col] = tar_id
+            light_curves.append(lightcurve_df)
 
         return light_curves
 
     @staticmethod
-    def arc_to_deg(arc, unit):
+    def _arc_to_deg(arc, unit):
         """
         Convert arc minutes or seconds to decimal degree units
 
