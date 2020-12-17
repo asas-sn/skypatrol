@@ -5,6 +5,22 @@ from astropy.timeseries import LombScargle
 import matplotlib.pyplot as plt
 
 
+def _arc_to_deg(arc, unit):
+    """
+    Convert arc minutes or seconds to decimal degree units
+
+    :param arc: length of arc, float or np array
+    :param unit: 'arcmin' or 'arcsec'
+    :return: decimal degrees
+    """
+    if unit == 'arcmin':
+        return arc / 60
+    elif unit == 'arcsec':
+        return arc / 3600
+    else:
+        raise ValueError("unit not in ['arcmin', 'arcsec']")
+
+
 def _block_arr(arr, size):
     return [arr[i:i + size] for i in range(0, len(arr), size)]
 

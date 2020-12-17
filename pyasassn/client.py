@@ -1,23 +1,17 @@
 from pymongo import MongoClient
 from base64 import encodebytes
-import requests, os
+import requests
 import pandas as pd
 import json
 import numpy as np
 from multiprocessing import Pool
 import re
 import pyarrow as pa
-from .utils import LightCurveCollection, _block_arr, Catalog
+from .utils import LightCurveCollection, _block_arr, _arc_to_deg, Catalog
 
 
 class SkyPatrolClient:
-    lightcurve_units = {'jd': "Julian Date",
-                        'flux': "mJy",
-                        'flux_err': "mJy",
-                        'mag': "magnitude",
-                        'mag_err': "magnitude",
-                        'limit': "magnitude",
-                        'fwhm': "pixels"}
+
 
     def __init__(self, user, password):
         """
@@ -124,7 +118,7 @@ class SkyPatrolClient:
 
         # Change units
         if units != "deg":
-            radius = SkyPatrolClient._arc_to_deg(np.float(radius), units)
+            radius = _arc_to_deg(np.float(radius), units)
 
         # Query the Flask server API for cone
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_cone/radius{radius}_ra{ra_deg}_dec{dec_deg}"
@@ -361,22 +355,6 @@ class SkyPatrolClient:
             light_curves.append(lightcurve_df)
 
         return light_curves
-
-    @staticmethod
-    def _arc_to_deg(arc, unit):
-        """
-        Convert arc minutes or seconds to decimal degree units
-
-        :param arc: length of arc, float or np array
-        :param unit: 'arcmin' or 'arcsec'
-        :return: decimal degrees
-        """
-        if unit == 'arcmin':
-            return arc / 60
-        elif unit == 'arcsec':
-            return arc / 3600
-        else:
-            raise ValueError("unit not in ['arcmin', 'arcsec']")
 
 
 
