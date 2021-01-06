@@ -181,9 +181,6 @@ class SkyPatrolClient:
         # Limit sources
         if catalog not in self.catalogs.catalog_names():
             raise ValueError("invalid catalog")
-        # If catalog is master or stellar_main, default is 'asas_sn_id'
-        if catalog in ['master_list', 'stellar_main']:
-            id_col = 'asas_sn_id'
 
         # Check catalog columns
         if id_col not in list(self.catalogs[catalog]["col_names"]):
