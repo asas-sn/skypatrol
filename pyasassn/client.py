@@ -319,17 +319,17 @@ class SkyPatrolClient:
 
         if mongo_collection == 'phot':
             id_col = 'asas_sn_id'
-            collection = db.phot
-            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm']
+            collection = db.deep_space
+            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm', 'quality']
 
         elif mongo_collection == 'asteroids':
             id_col = 'name'
-            collection = db.asteroids
-            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm']
+            collection = db.asteroid
+            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm', 'quality']
 
         elif mongo_collection == 'comets':
             id_col = 'name'
-            collection = db.comets
+            collection = db.comet
             colnames = ['jd',
                        'flux', 'flux_err', 'mag', 'mag_err', 'limit',
                        'flux_1', 'flux_err_1', 'mag_1', 'mag_err_1', 'limit_1',
@@ -338,7 +338,7 @@ class SkyPatrolClient:
                        'flux_4', 'flux_err_4', 'mag_4', 'mag_err_4', 'limit_4',
                        'flux_5', 'flux_err_5', 'mag_5', 'mag_err_5', 'limit_5',
                        'flux_6', 'flux_err_6', 'mag_6', 'mag_err_6', 'limit_6',
-                       'fwhm']
+                       'fwhm', 'quality']
         else:
             raise ValueError("Invalid curve type")
 
