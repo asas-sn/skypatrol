@@ -375,6 +375,12 @@ class SkyPatrolClient:
             lightcurve_df = pd.DataFrame(phot_measurments, columns=colnames)
             lightcurve_df["cam"] = cam_ids
             lightcurve_df[id_col] = tar_id
+
+            # Reorder columns
+            cols = list(lightcurve_df.columns)
+            cols = [cols[-1]] + cols[:-1]
+            lightcurve_df = lightcurve_df[cols]
+
             light_curves.append(lightcurve_df)
 
         return light_curves
