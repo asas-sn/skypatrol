@@ -7,6 +7,7 @@ import numpy as np
 from multiprocessing import Pool
 import re
 import pyarrow as pa
+import warnings
 from .utils import LightCurveCollection, _block_arr, _arc_to_deg
 
 
@@ -76,8 +77,11 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        buff = pa.py_buffer(response.content)
-        tar_df = pa.deserialize(buff)
+        with warnings.catch_warnings():
+            warnings.simplefilter(action='ignore', category=FutureWarning)
+            buff = pa.py_buffer(response.content)
+            tar_df = pa.deserialize(buff)
+
         self.index = tar_df
 
         if download is False:
@@ -140,8 +144,11 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        buff = pa.py_buffer(response.content)
-        tar_df = pa.deserialize(buff)
+        with warnings.catch_warnings():
+            warnings.simplefilter(action='ignore', category=FutureWarning)
+            buff = pa.py_buffer(response.content)
+            tar_df = pa.deserialize(buff)
+
         self.index = tar_df
 
         if download is False:
@@ -217,8 +224,11 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        buff = pa.py_buffer(response.content)
-        tar_df = pa.deserialize(buff)
+        with warnings.catch_warnings():
+            warnings.simplefilter(action='ignore', category=FutureWarning)
+            buff = pa.py_buffer(response.content)
+            tar_df = pa.deserialize(buff)
+
         self.index = tar_df
 
         if download is False:
@@ -277,8 +287,11 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        buff = pa.py_buffer(response.content)
-        tar_df = pa.deserialize(buff)
+        with warnings.catch_warnings():
+            warnings.simplefilter(action='ignore', category=FutureWarning)
+            buff = pa.py_buffer(response.content)
+            tar_df = pa.deserialize(buff)
+
         self.index = tar_df
 
         if download is False:
