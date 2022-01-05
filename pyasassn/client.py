@@ -333,12 +333,12 @@ class SkyPatrolClient:
         if mongo_collection == 'phot':
             id_col = 'asas_sn_id'
             collection = db.deep_space
-            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm', 'quality']
+            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm']
 
         elif mongo_collection == 'asteroids':
             id_col = 'name'
             collection = db.asteroid
-            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm', 'quality']
+            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm']
 
         elif mongo_collection == 'comets':
             id_col = 'name'
@@ -351,7 +351,7 @@ class SkyPatrolClient:
                        'flux_4', 'flux_err_4', 'mag_4', 'mag_err_4', 'limit_4',
                        'flux_5', 'flux_err_5', 'mag_5', 'mag_err_5', 'limit_5',
                        'flux_6', 'flux_err_6', 'mag_6', 'mag_err_6', 'limit_6',
-                       'fwhm', 'quality']
+                       'fwhm']
         else:
             raise ValueError("Invalid curve type")
 
