@@ -3,6 +3,7 @@ import numpy as np
 import os
 from astropy.timeseries import LombScargle
 import matplotlib.pyplot as plt
+import sqlalchemy
 
 
 def _arc_to_deg(arc, unit):
@@ -24,6 +25,21 @@ def _arc_to_deg(arc, unit):
 def _block_arr(arr, size):
     return [arr[i:i + size] for i in range(0, len(arr), size)]
 
+
+def _query_sql_quality(img_ids):
+    # Get engine
+    engine = sqlalchemy.create_engine("mysql+pymysql://bad_client:a5a55N_CLIENT@rainier.ifa.hawaii.edu/exposures")
+    # Create query
+    id_str = ', '.join(f'"{i}"' for i in img_ids)
+    query = f"SELECT filename AS image_id, goodimg AS quality FROM reduced WHERE filename IN ({id_str})"
+    # Query engine
+    df = pd.read_sql(query, engine)
+    # Remap values
+    quality_map = {1: "G", 0: "B"}
+    df['image_id'] = df['image_id'].str.decode("utf-8")
+    df["quality"].replace(quality_map, inplace=True)
+    return df
+
 class LightCurveCollection(object):
     """
     Object for storing and analysing ASAS-SN Sky Patrol light curves.
@@ -36,34 +52,41 @@ class LightCurveCollection(object):
         self.data = data
         self.catalog_info = catalog_info
 
-    def apply_function(self, func, col='mag', include_non_det=False):
+    def apply_function(self, func, col='mag', include_non_det=False, include_poor_images=False):
         """
         Apply a custom aggregate function to all light curves in the collection.
 
         :param func: custom aggregate function
         :param col: column to apply aggregate function; defaluts to 'mag'
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
+        :param include_poor_images whether or not to include images of poor or unknown quality; defaults to False
         :return: pandas Dataframe with results
         """
-        if include_non_det:
-            data = self.data
-        else:
-            data = self.data[self.data['mag_err'] < 99]
+
+        # Filter preferences for this function call only
+        data = self.data
+        if not include_non_det:
+            data = data[data['mag_err'] < 99]
+        if not include_poor_images:
+            data = data[data['quality'] == 'G']
 
         return data.groupby(self.id_col).agg({col: func})
 
-    def stats(self, include_non_det=False):
+    def stats(self, include_non_det=False, include_poor_images=False):
         """
         Calculate simple aggregate statistics on the collection.
         Gets the mean and stddev magnitude for each curve as well as the total number of epochs observed.
 
+        :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: pandas Dataframe with results
         """
-        if include_non_det:
-            data = self.data
-        else:
-            data = self.data[self.data['mag_err'] < 99]
+        # Filter preferences for this function call only
+        data = self.data
+        if not include_non_det:
+            data = data[data['mag_err'] < 99]
+        if not include_poor_images:
+            data = data[data['quality'] == 'G']
 
         return data.groupby(self.id_col).agg(mean_mag=('mag', 'mean'),
                                              std_mag=('mag', 'std'),
@@ -140,25 +163,31 @@ class LightCurve:
 
         self.data.to_csv(filename, mode='a', index=False)
 
-    def plot(self, figsize=(12,8), savefile=None):
+    def plot(self, figsize=(12,8), savefile=None, include_poor_images=False):
         """
         Plots the given light curve with error bars.
 
-        :param figsize: size of the plot.
+        :param figsize: size of the plot
         :param savefile: file name to save the plot; if None plot will be directly displayed
+        :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :return: void
         """
+        # Filter preferences
+        data = self.data
+        if not include_poor_images:
+            data = data[data['quality'] == 'G']
 
-        errors = self.data.mag_err > 99
+        errors = data.mag_err > 99
+
         plt.figure(figsize=figsize)
-        plt.errorbar(x=self.data[~errors].jd - 2450000,
-                     y=self.data[~errors].mag,
-                     yerr=self.data[~errors].mag_err,
+        plt.errorbar(x=data[~errors].jd - 2450000,
+                     y=data[~errors].mag,
+                     yerr=data[~errors].mag_err,
                      fmt="o",
                      c="teal",
                      label="detections")
-        plt.errorbar(x=self.data[errors].jd - 2450000,
-                     y=self.data[errors].mag,
+        plt.errorbar(x=data[errors].jd - 2450000,
+                     y=data[errors].mag,
                      fmt="v",
                      c="red",
                      label="non-detections")
@@ -177,7 +206,8 @@ class LightCurve:
 
     def lomb_scargle(self, fit_mean=True, center_data=True, nterms=1, normalization='standard',
                      minimum_frequency=0.001, maximum_frequency=25, method='auto', samples_per_peak=5,
-                     nyquist_factor=5, plot=True, figsize=(12,8), savefile=None):
+                     nyquist_factor=5, plot=True, figsize=(12,8), savefile=None,
+                     include_poor_images=False, include_non_det=False):
         """
         Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
         light curve. Default values work for most variable sources.
@@ -209,15 +239,18 @@ class LightCurve:
         :param plot: if True, then the function also produces a plot of the power spectrum.
         :param figsize: size of the plot.
         :param savefile: file name to save the plot; if None plot will be directly displayed
+        :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
+        :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: power, frequency and the astropy LombScargle object
         """
+        # Filter preferences for this function call only
+        data = self.data
+        if not include_non_det:
+            data = data[data['mag_err'] < 99]
+        if not include_poor_images:
+            data = data[data['quality'] == 'G']
 
-        # Don't count nondetections
-        errors = self.data.mag_err > 99
-        jd = self.data[~errors].jd
-        mag = self.data[~errors].mag
-
-        ls = LombScargle(jd, mag,
+        ls = LombScargle(data.jd, data.mag,
                          fit_mean=fit_mean,
                          center_data=center_data,
                          nterms=nterms,
@@ -234,7 +267,7 @@ class LightCurve:
 
             plt.plot(frequency, power)
             self._label_plots()
-            plt.xlabel("Frequemcy")
+            plt.xlabel("Frequency")
             plt.ylabel("Power")
 
             if savefile:
@@ -243,7 +276,8 @@ class LightCurve:
                 plt.show()
         return frequency, power, ls
 
-    def find_period(self, frequency, power, best_frequency=None, plot=True, figsize=(12,8), savefile=None):
+    def find_period(self, frequency, power, best_frequency=None, plot=True, figsize=(12,8), savefile=None,
+                    include_poor_images=False, include_non_det=False):
         """
         Find the period of the light curve given the power spectrum produced by lomb_scargle.
         Also produces a phase-folded plot of the light curve.
@@ -251,16 +285,20 @@ class LightCurve:
         :param frequency: frequency from lomb_scargle()
         :param power: power from lomb_scargle()
         :param best_frequency: peak frequency for phase folding the light curve
-        :param plot: if True, then the function also produces a plot of the phase-folded light curve.
-        :param figsize: size of the plot.
+        :param plot: if True, then the function also produces a plot of the phase-folded light curve
+        :param figsize: size of the plot
         :param savefile: file name to save the plot; if None plot will be directly displayed
+        :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
+        :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: period of the light curve
         """
+        # Filter preferences for this function call only
+        data = self.data
+        if not include_non_det:
+            data = data[data['mag_err'] < 99]
+        if not include_poor_images:
+            data = data[data['quality'] == 'G']
 
-        # Don't count non-detections
-        errors = self.data.mag_err > 99
-        jd = self.data[~errors].jd
-        mag = self.data[~errors].mag
 
         if best_frequency is None:
             best_frequency = frequency[np.argmax(power)]
@@ -269,11 +307,11 @@ class LightCurve:
         period = 1 / best_frequency
 
         if plot:
-            folded_jd = jd % period
+            folded_jd = data.jd % period
 
             # Concatenate for multiple peaks
             x = np.concatenate([folded_jd / period, folded_jd / period + 1])
-            y = np.concatenate([mag, mag])
+            y = np.concatenate([data.mag, data.mag])
 
             plt.figure(figsize=figsize)
             plt.scatter(x, y)
@@ -288,7 +326,6 @@ class LightCurve:
                 plt.show()
 
         return period
-
 
 
     def _label_plots(self):

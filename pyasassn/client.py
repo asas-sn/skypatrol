@@ -4,11 +4,11 @@ import requests
 import pandas as pd
 import json
 import numpy as np
-from multiprocessing import Pool
+import multiprocessing
 import re
 import pyarrow as pa
 import warnings
-from .utils import LightCurveCollection, _block_arr, _arc_to_deg
+from .utils import LightCurveCollection, _block_arr, _arc_to_deg, _query_sql_quality
 
 
 class SkyPatrolClient:
@@ -309,11 +309,11 @@ class SkyPatrolClient:
         else:
             mongo_collection = catalog
 
-        # We will only query 1,000 docs at a time
+        # We will only query 10,000 docs at a time
         tar_id_blocks = _block_arr(tar_ids, 10000)
 
         # Build process pool. Each block of ids gets one worker
-        with Pool(processes=threads) as pool:
+        with multiprocessing.Pool(processes=threads) as pool:
             # Query one block at a time
             result_blocks = [pool.apply_async(self._query_mongo, args=(id_block, mongo_collection))
                              for id_block in tar_id_blocks]
@@ -358,34 +358,36 @@ class SkyPatrolClient:
         # Query Mongo
         docs = list(collection.find({id_col: {"$in": id_block}}, {"_id": False}))
         light_curves = []
+        # Iterate through documents
         for doc in docs:
-            # Identifier
-            tar_id = doc[id_col]
-            # Base lists
-            phot_measurments = []
-            cam_ids = []
-
             # Parse individual lightcurve
-            for key, value in doc.items():
-                if key == id_col:
-                    continue
-                cam_ids.append(key[:2])
-                phot_measurments.append(value)
+            tar_id = doc[id_col]
+            del doc[id_col]
 
-            lightcurve_df = pd.DataFrame(phot_measurments, columns=colnames)
-            lightcurve_df["cam"] = cam_ids
+            # Get photometry datta
+            lightcurve_df = pd.DataFrame(doc.values(), columns=colnames)
+            # Get image information
+            lightcurve_df["image_id"] = doc.keys()
+            lightcurve_df['camera'] = lightcurve_df['image_id'].str[:2]
+            # Add target data
             lightcurve_df[id_col] = tar_id
 
             # Reorder columns
             cols = list(lightcurve_df.columns)
             cols = [cols[-1]] + cols[:-1]
             lightcurve_df = lightcurve_df[cols]
-
             light_curves.append(lightcurve_df)
 
+        # Merge to single dataframe
+        lc_df = pd.concat(light_curves)
+        # Find unique associated images
+        img_ids = list(lc_df.image_id.unique())
+        # Query image quality
+        quality_df = _query_sql_quality(img_ids)
+        # Append quality flags to light curves
+        light_curves = [lc.merge(quality_df, on='image_id', how='left') for lc in light_curves]
+
         return light_curves
-
-
 
     class InputCatalogs(object):
         """
