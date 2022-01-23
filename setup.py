@@ -14,5 +14,5 @@ setup(name='pyasassn',
             'pandas==1.0.5',
             'pyarrow==4.0.1',
             'astropy==4.0.1',
-            'numpy==1.19.0'],
+            'numpy==1.21.0'],
       zip_safe=False)
