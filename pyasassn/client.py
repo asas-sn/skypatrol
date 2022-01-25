@@ -8,7 +8,8 @@ import multiprocessing
 import re
 import pyarrow as pa
 import warnings
-from .utils import LightCurveCollection, _block_arr, _arc_to_deg, _query_sql_quality
+import sqlalchemy
+from .utils import LightCurveCollection, _block_arr, _arc_to_deg,
 
 
 class SkyPatrolClient:
@@ -383,11 +384,26 @@ class SkyPatrolClient:
         # Find unique associated images
         img_ids = list(lc_df.image_id.unique())
         # Query image quality
-        quality_df = _query_sql_quality(img_ids)
+        quality_df = self._query_sql_quality(img_ids)
         # Append quality flags to light curves
         light_curves = [lc.merge(quality_df, on='image_id', how='left') for lc in light_curves]
 
         return light_curves
+
+    def _query_sql_quality(self, img_ids):
+        # Get engine
+        conn_str = f"mysql+pymysql://{self.user_name}:{self.password}@rainier.ifa.hawaii.edu/exposures"
+        engine = sqlalchemy.create_engine(conn_str)
+        # Create query
+        id_str = ', '.join(f'"{i}"' for i in img_ids)
+        query = f"SELECT filename AS image_id, goodimg AS quality FROM reduced WHERE filename IN ({id_str})"
+        # Query engine
+        df = pd.read_sql(query, engine)
+        # Remap values
+        quality_map = {1: "G", 0: "B"}
+        df['image_id'] = df['image_id'].str.decode("utf-8")
+        df["quality"].replace(quality_map, inplace=True)
+        return df
 
     class InputCatalogs(object):
         """

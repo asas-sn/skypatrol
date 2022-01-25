@@ -26,20 +26,6 @@ def _block_arr(arr, size):
     return [arr[i:i + size] for i in range(0, len(arr), size)]
 
 
-def _query_sql_quality(img_ids):
-    # Get engine
-    engine = sqlalchemy.create_engine("mysql+pymysql://bad_client:a5a55N_CLIENT@rainier.ifa.hawaii.edu/exposures")
-    # Create query
-    id_str = ', '.join(f'"{i}"' for i in img_ids)
-    query = f"SELECT filename AS image_id, goodimg AS quality FROM reduced WHERE filename IN ({id_str})"
-    # Query engine
-    df = pd.read_sql(query, engine)
-    # Remap values
-    quality_map = {1: "G", 0: "B"}
-    df['image_id'] = df['image_id'].str.decode("utf-8")
-    df["quality"].replace(quality_map, inplace=True)
-    return df
-
 class LightCurveCollection(object):
     """
     Object for storing and analysing ASAS-SN Sky Patrol light curves.
