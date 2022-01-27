@@ -9,7 +9,7 @@ import re
 import pyarrow as pa
 import warnings
 import sqlalchemy
-from .utils import LightCurveCollection, _block_arr, _arc_to_deg,
+from .utils import LightCurveCollection, _block_arr, _arc_to_deg
 
 
 class SkyPatrolClient:
