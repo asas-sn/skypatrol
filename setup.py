@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='pyasassn',
-      version='0.5.4',
+      version='0.5.5',
       url="https://github.com/asas_sn/skypatrol/",
       author='Kyle Hart',
       author_email='kylehart@hawaii.edu',
@@ -11,8 +11,9 @@ setup(name='pyasassn',
             'requests',
             'pymongo',
             'sqlalchemy',
-            'pandas==1.0.5',
+            'pandas',
             'pyarrow==4.0.1',
-            'astropy==4.0.1',
-            'numpy==1.19.0'],
+            'astropy',
+            'numpy',
+            'pymysql'],
       zip_safe=False)
