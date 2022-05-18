@@ -68,8 +68,7 @@ class SkyPatrolClient:
                                             'download': download})
 
         # if the status code is not an error code (4xx or 5xx), it is considered ‘true’
-        if not response:
-            response.raise_for_status()
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -135,9 +134,7 @@ class SkyPatrolClient:
                                             'download': download})
 
         # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
-            raise RuntimeError(error)
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -219,9 +216,7 @@ class SkyPatrolClient:
                                             'download': download})
 
         # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
-            raise RuntimeError(error)
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -289,9 +284,7 @@ class SkyPatrolClient:
                                             'download': download})
 
         # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
-            raise RuntimeError(error)
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -342,6 +335,14 @@ class SkyPatrolClient:
         # Return as dataframe
         return _deserialize(response)
 
+    def _validate_response(self, response):
+        """
+        Validate the response before deserialization
+        """
+        # If the response is not an error (4xx, 5xx), it is true
+        if not response:
+            response.raise_for_status()
+
 
     class InputCatalogs(object):
         """
@@ -387,7 +388,6 @@ class SkyPatrolClient:
 
         def __getitem__(self, item):
             return self.__dict__[item]
-
 
 def _deserialize(response):
     # Deserialize from arrow
