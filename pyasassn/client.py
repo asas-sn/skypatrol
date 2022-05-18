@@ -67,10 +67,9 @@ class SkyPatrolClient:
         response = requests.post(url, json={'format': 'arrow',
                                             'download': download})
 
-        # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
-            raise RuntimeError(error)
+        # if the status code is not an error code (4xx or 5xx), it is considered ‘true’
+        if not response:
+            response.raise_for_status()
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
