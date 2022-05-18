@@ -1,4 +1,3 @@
-from pymongo import MongoClient
 from base64 import encodebytes
 import requests
 import pandas as pd
@@ -8,8 +7,7 @@ import multiprocessing
 import re
 import pyarrow as pa
 import warnings
-import sqlalchemy
-from .utils import LightCurveCollection, _block_arr, _arc_to_deg
+from .utils import LightCurveCollection
 
 
 class SkyPatrolClient:
@@ -22,15 +20,11 @@ class SkyPatrolClient:
         queried targets.
     """
 
-    def __init__(self, user, password):
+    def __init__(self):
         """
         Creates SkyPatrolClient object
-        :param user: username to interact with the light curve database; string.
-        :param password: password to interact with the light curve database; string.
         """
         self.index = None
-        self.user_name = user
-        self.password = password
         try:
             url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_schema"
             url_data = requests.get(url).content
@@ -65,12 +59,13 @@ class SkyPatrolClient:
             raise ValueError("'query_str' must me string value")
 
         # Trim ADQL input
-        query_str = re.sub(' +', ' ', query_str).replace("\n", "")
-        query_bytes = encodebytes(bytes(query_str, encoding='utf-8')).decode()
+        query_str = re.sub(r'(\s+)', ' ', query_str)
+        query_hash = encodebytes(bytes(query_str, encoding='utf-8')).decode()
 
         # Query Flask API with SQL bytes
-        url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_sql/{query_bytes}"
-        response = requests.post(url, json={'format': 'arrow'})
+        url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_sql/{query_hash}"
+        response = requests.post(url, json={'format': 'arrow',
+                                            'download': download})
 
         # Check response
         if response.status_code == 400:
@@ -78,19 +73,17 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        with warnings.catch_warnings():
-            warnings.simplefilter(action='ignore', category=FutureWarning)
-            buff = pa.py_buffer(response.content)
-            tar_df = pa.deserialize(buff)
-
+        tar_df = _deserialize(response)
         self.index = tar_df
 
         if download is False:
+            # Return a dataframe of catalog search results
             return tar_df
-
         else:
+            # Get lightcurve ids to pull
             tar_ids = list(tar_df['asas_sn_id'])
-            return self._get_curves(tar_ids, "extrasolar", threads)
+            # Returns a LightCurveCollection object
+            return self._get_curves(query_hash, tar_ids, "extrasolar", threads)
 
     def cone_search(self, ra_deg, dec_deg, radius, units='deg', catalog='master_list', cols=None,
                     download=False,  threads=1):
@@ -137,7 +130,10 @@ class SkyPatrolClient:
 
         # Query the Flask server API for cone
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_cone/radius{radius}_ra{ra_deg}_dec{dec_deg}"
-        response = requests.post(url, json={'catalog': catalog, 'cols': cols, 'format': 'arrow'})
+        response = requests.post(url, json={'catalog': catalog,
+                                            'cols': cols,
+                                            'format': 'arrow',
+                                            'download': download})
 
         # Check response
         if response.status_code == 400:
@@ -145,20 +141,23 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        with warnings.catch_warnings():
-            warnings.simplefilter(action='ignore', category=FutureWarning)
-            buff = pa.py_buffer(response.content)
-            tar_df = pa.deserialize(buff)
-
+        tar_df = _deserialize(response)
         self.index = tar_df
 
         if download is False:
+            # Return a dataframe of catalog search results
             return tar_df
-
         else:
+            # Generate query information
+            query_id = f"conectr-{radius}_conera-{ra_deg}_conedec-{dec_deg}|catalog-{catalog}|cols-" + "/".join(cols)
+            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
+
+            # Get lightcurve ids to pull
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
-            return self._get_curves(tar_ids, catalog, threads)
+
+            # Returns a LightCurveCollection object
+            return self._get_curves(query_hash, tar_ids, catalog, threads)
 
     def query_list(self, tar_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, download=False, threads=1):
         """
@@ -217,7 +216,8 @@ class SkyPatrolClient:
                                             'catalog': catalog,
                                             'id_col': id_col,
                                             'cols': cols,
-                                            'format': 'arrow'})
+                                            'format': 'arrow',
+                                            'download': download})
 
         # Check response
         if response.status_code == 400:
@@ -225,20 +225,24 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        with warnings.catch_warnings():
-            warnings.simplefilter(action='ignore', category=FutureWarning)
-            buff = pa.py_buffer(response.content)
-            tar_df = pa.deserialize(buff)
-
+        tar_df = _deserialize(response)
         self.index = tar_df
 
         if download is False:
+            # Return a dataframe of catalog search results
             return tar_df
-
         else:
+            # Get lightcurve ids to pull
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
-            return self._get_curves(tar_ids, catalog, threads)
+
+            # Generate query information
+            query_id = f"listlen-{len(tar_ids)}_listfirst-{tar_ids[0]}_listend-{tar_ids[-1]}" \
+                       f"|catalog-{catalog}|id_col-{id_col}|cols-" + "/".join(cols)
+            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
+
+            # Returns a LightCurveCollection object
+            return self._get_curves(query_hash, tar_ids, catalog, threads)
 
     def random_sample(self, n, catalog='master_list', cols=None, download=False, threads=1):
         """
@@ -280,7 +284,10 @@ class SkyPatrolClient:
 
         # Query API with list (POST METHOD)
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_targets/random_{n}"
-        response = requests.post(url, json={'catalog': catalog, 'cols': cols, 'format': 'arrow'})
+        response = requests.post(url, json={'catalog': catalog,
+                                            'cols': cols,
+                                            'format': 'arrow',
+                                            'download': download})
 
         # Check response
         if response.status_code == 400:
@@ -288,122 +295,54 @@ class SkyPatrolClient:
             raise RuntimeError(error)
 
         # Deserialize from arrow
-        with warnings.catch_warnings():
-            warnings.simplefilter(action='ignore', category=FutureWarning)
-            buff = pa.py_buffer(response.content)
-            tar_df = pa.deserialize(buff)
-
+        tar_df = _deserialize(response)
         self.index = tar_df
 
         if download is False:
+            # Return a dataframe of catalog search results
             return tar_df
-
         else:
+            # Get lightcurve ids to pull
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
-            return self._get_curves(tar_ids, catalog, threads)
 
-    def _get_curves(self, tar_ids, catalog, threads=1):
-        # Make sure we query correct collection
-        if catalog not in ["asteroids", "comets"]:
-            mongo_collection = "phot"
-        else:
-            mongo_collection = catalog
+            # Generate query information
+            query_id = f"random-{n}|catalog-{catalog}|cols-" + "/".join(cols)
+            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
 
-        # We will only query 10,000 docs at a time
-        tar_id_blocks = _block_arr(tar_ids, 10000)
+            # Returns a LightCurveCollection object
+            return self._get_curves(query_hash, tar_ids, catalog, threads)
 
-        # Build process pool. Each block of ids gets one worker
+    def _get_curves(self, query_hash, tar_ids, catalog, threads=1):
+        # Get number of id chunks
+        n_chunks = int(np.ceil(len(tar_ids) / 1000))
+
+        # Get targets via mutlithreaded requests
+
         with multiprocessing.Pool(processes=threads) as pool:
-            # Query one block at a time
-            result_blocks = [pool.apply_async(self._query_mongo, args=(id_block, mongo_collection))
-                             for id_block in tar_id_blocks]
+            results = [pool.apply_async(self._get_lightcurve_chunk, args=(query_hash, idx, catalog,))
+                       for idx in range(n_chunks)]
 
-            lcs = [curve for block in result_blocks for curve in block.get()]
-            lc_df = pd.concat(lcs)
-            return LightCurveCollection(lc_df, self.index, id_col='asas_sn_id' if mongo_collection == 'phot'
-                                                                                else 'name')
+            lc_dfs = [r.get() for r in results]
 
-    def _query_mongo(self, id_block, mongo_collection):
+        # lc_dfs = [self._get_lightcurve_chunk(query_hash, idx, catalog) for idx in range(n_chunks)]
+        data = pd.concat(lc_dfs)
+        return LightCurveCollection(data, self.index,
+                                    id_col='asas_sn_id'
+                                        if catalog not in ['asteroids', 'comets']
+                                        else 'name')
 
-        # Connect Mongo Client
-        client = MongoClient(f"mongodb://{self.user_name}:{self.password}"
-                             f"@asassn-lb01.ifa.hawaii.edu:27020/asas_sn")
-        db = client.asas_sn
 
-        if mongo_collection == 'phot':
-            id_col = 'asas_sn_id'
-            collection = db.deep_space
-            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm']
+    def _get_lightcurve_chunk(self, query_hash, block_idx, catalog):
+        # Query API with (POST METHOD)
+        server = (block_idx % 3) + 1
+        url = f"http://asassn-data{server:02d}.ifa.hawaii.edu:9006/get_block/" \
+              f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
+        response = requests.get(url)
 
-        elif mongo_collection == 'asteroids':
-            id_col = 'name'
-            collection = db.asteroid
-            colnames = ['jd', 'flux', 'flux_err', 'mag', 'mag_err', 'limit', 'fwhm']
+        # Return as dataframe
+        return _deserialize(response)
 
-        elif mongo_collection == 'comets':
-            id_col = 'name'
-            collection = db.comet
-            colnames = ['jd',
-                       'flux', 'flux_err', 'mag', 'mag_err', 'limit',
-                       'flux_1', 'flux_err_1', 'mag_1', 'mag_err_1', 'limit_1',
-                       'flux_2', 'flux_err_2', 'mag_2', 'mag_err_2', 'limit_2',
-                       'flux_3', 'flux_err_3', 'mag_3', 'mag_err_3', 'limit_3',
-                       'flux_4', 'flux_err_4', 'mag_4', 'mag_err_4', 'limit_4',
-                       'flux_5', 'flux_err_5', 'mag_5', 'mag_err_5', 'limit_5',
-                       'flux_6', 'flux_err_6', 'mag_6', 'mag_err_6', 'limit_6',
-                       'fwhm']
-        else:
-            raise ValueError("Invalid curve type")
-
-        # Query Mongo
-        docs = list(collection.find({id_col: {"$in": id_block}}, {"_id": False}))
-        light_curves = []
-        # Iterate through documents
-        for doc in docs:
-            # Parse individual lightcurve
-            tar_id = doc[id_col]
-            del doc[id_col]
-
-            # Get photometry datta
-            lightcurve_df = pd.DataFrame(doc.values(), columns=colnames)
-            # Get image information
-            lightcurve_df["image_id"] = doc.keys()
-            lightcurve_df['camera'] = lightcurve_df['image_id'].str[:2]
-            # Add target data
-            lightcurve_df[id_col] = tar_id
-
-            # Reorder columns
-            cols = list(lightcurve_df.columns)
-            cols = [cols[-1]] + cols[:-1]
-            lightcurve_df = lightcurve_df[cols]
-            light_curves.append(lightcurve_df)
-
-        # Merge to single dataframe
-        lc_df = pd.concat(light_curves)
-        # Find unique associated images
-        img_ids = list(lc_df.image_id.unique())
-        # Query image quality
-        quality_df = self._query_sql_quality(img_ids)
-        # Append quality flags to light curves
-        light_curves = [lc.merge(quality_df, on='image_id', how='left') for lc in light_curves]
-
-        return light_curves
-
-    def _query_sql_quality(self, img_ids):
-        # Get engine
-        conn_str = f"mysql+pymysql://{self.user_name}:{self.password}@rainier.ifa.hawaii.edu/exposures"
-        engine = sqlalchemy.create_engine(conn_str)
-        # Create query
-        id_str = ', '.join(f'"{i}"' for i in img_ids)
-        query = f"SELECT filename AS image_id, goodimg AS quality FROM reduced WHERE filename IN ({id_str})"
-        # Query engine
-        df = pd.read_sql(query, engine)
-        # Remap values
-        quality_map = {1: "G", 0: "B"}
-        df['image_id'] = df['image_id'].str.decode("utf-8")
-        df["quality"].replace(quality_map, inplace=True)
-        return df
 
     class InputCatalogs(object):
         """
@@ -449,4 +388,28 @@ class SkyPatrolClient:
 
         def __getitem__(self, item):
             return self.__dict__[item]
+
+
+def _deserialize(response):
+    # Deserialize from arrow
+    with warnings.catch_warnings():
+        warnings.simplefilter(action='ignore', category=FutureWarning)
+        buff = pa.py_buffer(response.content)
+        return pa.deserialize(buff)
+
+
+def _arc_to_deg(arc, unit):
+    """
+    Convert arc minutes or seconds to decimal degree units
+
+    :param arc: length of arc, float or np array
+    :param unit: 'arcmin' or 'arcsec'
+    :return: decimal degrees
+    """
+    if unit == 'arcmin':
+        return arc / 60
+    elif unit == 'arcsec':
+        return arc / 3600
+    else:
+        raise ValueError("unit not in ['arcmin', 'arcsec']")
 
