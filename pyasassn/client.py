@@ -1,10 +1,12 @@
 from base64 import encodebytes
+from glob import glob
 import requests
 import pandas as pd
 import json
 import numpy as np
 import multiprocessing
 import re
+import os
 import pyarrow as pa
 import warnings
 from .utils import LightCurveCollection
@@ -19,12 +21,12 @@ class SkyPatrolClient:
         on astronomical targets, or they will be returned as LightCurveCollections containing photometry data from all
         queried targets.
     """
-
-    def __init__(self):
+    def __init__(self, verbose=True):
         """
         Creates SkyPatrolClient object
         """
         self.index = None
+        self.verbose = verbose
         try:
             url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_schema"
             url_data = requests.get(url).content
@@ -39,13 +41,15 @@ class SkyPatrolClient:
         except ConnectionError as e:
             raise ConnectionError("Unable to connect to ASAS-SN Servers")
 
-    def adql_query(self, query_str, download=False, threads=1):
+    def adql_query(self, query_str, download=False, save_dir=None, file_format="parquet", threads=1):
         """
         Query the ASAS-SN Sky Patrol Input Catalogs with an ADQL string.
         See README.md for more on accepted ADQL context and functions.
 
         :param query_str: ADQL query string
         :param download: return full light curves if True, return catalog information if False
+        :param save_dir: if set, then light curves will write to file as they are downloaded
+        :param file_format: format to save light curves ['parquet', 'pickle', 'csv']
         :param threads: number of real threads to use for pulling light curves from server.
         :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
                 else LightCurveCollection
@@ -80,13 +84,16 @@ class SkyPatrolClient:
             # Return a dataframe of catalog search results
             return tar_df
         else:
+            if save_dir:
+                self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
             tar_ids = list(tar_df['asas_sn_id'])
-            # Returns a LightCurveCollection object
-            return self._get_curves(query_hash, tar_ids, "extrasolar", threads)
+
+            # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
+            return self._get_curves(query_hash, tar_ids, "extrasolar", save_dir, file_format, threads)
 
     def cone_search(self, ra_deg, dec_deg, radius, units='deg', catalog='master_list', cols=None,
-                    download=False,  threads=1):
+                    download=False, save_dir=None, file_format="parquet", threads=1):
         """
         Query the ASAS-SN Sky Patrol Input Catalogs for all targets within a cone of the sky.
         Does NOT return solar system targets (i.e. asteroids and coma).
@@ -104,6 +111,8 @@ class SkyPatrolClient:
         :param cols: columns to return from the given input catalog;
                      if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
         :param download: return full light curves if True, return catalog information if False
+        :param save_dir: if set, then light curves will write to file as they are downloaded
+        :param file_format: format to save light curves ['parquet', 'pickle', 'csv']
         :param threads: number of real threads to use for pulling light curves from server.
         :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
                 else LightCurveCollection
@@ -148,6 +157,8 @@ class SkyPatrolClient:
             # Return a dataframe of catalog search results
             return tar_df
         else:
+            if save_dir:
+                self._save_index(save_dir, file_format)
             # Generate query information
             query_id = f"conectr-{radius}_conera-{ra_deg}_conedec-{dec_deg}|catalog-{catalog}|cols-" + "/".join(cols)
             query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
@@ -156,10 +167,11 @@ class SkyPatrolClient:
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
 
-            # Returns a LightCurveCollection object
-            return self._get_curves(query_hash, tar_ids, catalog, threads)
+            # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
+            return self._get_curves(query_hash, tar_ids, catalog, save_dir, file_format, threads)
 
-    def query_list(self, tar_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, download=False, threads=1):
+    def query_list(self, tar_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, download=False,
+                   save_dir=None, file_format="parquet", threads=1):
         """
         Query the ASAS-SN Sky Patrol Input Catalogs for all targets with the given identifiers.
         to view the available list of catalogs and identifiers see SkyPatrolClient.catalogs.
@@ -176,6 +188,8 @@ class SkyPatrolClient:
         :param cols: columns to return from the given input catalog;
                      if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
         :param download: return full light curves if True, return catalog information if False
+        :param save_dir: if set, then light curves will write to file as they are downloaded
+        :param file_format: format to save light curves ['parquet', 'pickle', 'csv']
         :param threads: number of real threads to use for pulling light curves from server.
         :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
                 else LightCurveCollection
@@ -232,6 +246,8 @@ class SkyPatrolClient:
             # Return a dataframe of catalog search results
             return tar_df
         else:
+            if save_dir:
+                self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
@@ -241,10 +257,11 @@ class SkyPatrolClient:
                        f"|catalog-{catalog}|id_col-{id_col}|cols-" + "/".join(cols)
             query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
 
-            # Returns a LightCurveCollection object
-            return self._get_curves(query_hash, tar_ids, catalog, threads)
+            # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
+            return self._get_curves(query_hash, tar_ids, catalog, save_dir, file_format, threads)
 
-    def random_sample(self, n, catalog='master_list', cols=None, download=False, threads=1):
+    def random_sample(self, n, catalog='master_list', cols=None, download=False, save_dir=None,
+                      file_format="parquet", threads=1):
         """
         Get n random targets from the ASAS-SN Sky Patrol Input Catalogs.
 
@@ -253,6 +270,8 @@ class SkyPatrolClient:
         :param cols: columns to return from the given input catalog;
                      if None default = ['asas_sn_id', 'ra_deg', 'dec_deg']
         :param download: return full light curves if True, return catalog information if False
+        :param save_dir: if set, then light curves will write to file as they are downloaded
+        :param file_format: format to save light curves ['parquet', 'pickle', 'csv']
         :param threads: number of real threads to use for pulling light curves from server.
         :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
                 else LightCurveCollection
@@ -302,6 +321,8 @@ class SkyPatrolClient:
             # Return a dataframe of catalog search results
             return tar_df
         else:
+            if save_dir:
+                self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
             id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
             tar_ids = list(tar_df[id_col])
@@ -310,39 +331,69 @@ class SkyPatrolClient:
             query_id = f"random-{n}|catalog-{catalog}|cols-" + "/".join(cols)
             query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
 
-            # Returns a LightCurveCollection object
-            return self._get_curves(query_hash, tar_ids, catalog, threads)
+            # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
+            return self._get_curves(query_hash, tar_ids, catalog, save_dir, file_format, threads)
 
-    def _get_curves(self, query_hash, tar_ids, catalog, threads=1):
+    def _get_curves(self, query_hash, tar_ids, catalog, save_dir, file_format, threads=1):
         # Get number of id chunks
         n_chunks = int(np.ceil(len(tar_ids) / 1000))
-
+        self._verbose_print("Downloading Curves...")
         # Get targets via mutlithreaded requests
-
         with multiprocessing.Pool(processes=threads) as pool:
-            results = [pool.apply_async(self._get_lightcurve_chunk, args=(query_hash, idx, catalog,))
+            results = [pool.apply_async(self._get_lightcurve_chunk,
+                                        args=(query_hash, idx, catalog, save_dir, file_format,))
                        for idx in range(n_chunks)]
 
-            lc_dfs = [r.get() for r in results]
+            chunks = []
+            count = 0
+            for r in results:
+                data, n = r.get()
+                chunks.append(data)
+                count += n
+                self._verbose_print(f"Pulled {count:,} of {len(self.index):,}", end="\r")
 
-        # lc_dfs = [self._get_lightcurve_chunk(query_hash, idx, catalog) for idx in range(n_chunks)]
-        data = pd.concat(lc_dfs)
-        return LightCurveCollection(data, self.index,
-                                    id_col='asas_sn_id'
-                                        if catalog not in ['asteroids', 'comets']
-                                        else 'name')
+            self._verbose_print("")
+        if save_dir is not None:
+            # Return list of filenames
+            return  [file for chunk in chunks for file in chunk]
+        else:
+            # Return in memory data as LightCurveCollection
+            data = pd.concat(chunks)
+            id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
+            return LightCurveCollection(data, self.index, id_col)
 
 
-    def _get_lightcurve_chunk(self, query_hash, block_idx, catalog):
+    def _get_lightcurve_chunk(self, query_hash, block_idx, catalog, save_dir, file_format):
         # Query API with (POST METHOD)
         server = (block_idx % 3) + 1
         url = f"http://asassn-data{server:02d}.ifa.hawaii.edu:9006/get_block/" \
               f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
         response = requests.get(url)
 
-        # Return as dataframe
-        return _deserialize(response)
+        # Pandas dataframe
+        data = _deserialize(response)
+        id_col ='asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
+        count = len(data[id_col].unique())
+        # Write to disk or return in memory
+        if save_dir is not None:
+            lcs = LightCurveCollection(data, self.index, id_col)
+            return lcs.save(save_dir, file_format, include_index=False), count
+        else:
+            return data, count
 
+    def _save_index(self, save_dir, file_format):
+        if file_format == 'parquet':
+            self.index.to_parquet(os.path.join(save_dir, 'index.parq'))
+        elif file_format == 'pickle':
+            self.index.to_pickle(os.path.join(save_dir, 'index.pkl'))
+        elif file_format == 'csv':
+            self.index.to_csv(os.path.join(save_dir, "index.csv"), index=False)
+        else:
+            raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
+
+    def _verbose_print(self, msg, end="\n"):
+        if self.verbose:
+            print(msg, end=end, flush=True)
 
     class InputCatalogs(object):
         """
@@ -413,3 +464,35 @@ def _arc_to_deg(arc, unit):
     else:
         raise ValueError("unit not in ['arcmin', 'arcsec']")
 
+
+def load_collection(save_dir, file_format='parquet'):
+    """
+    Loads a LightCurveCollection from directory.
+    Requires an index and light curve files saved from previous collection
+    :param save_dir: path where collection is saved
+    :param file_format: format of saved light curves
+    :return: LightCurveCollection
+    """
+    if file_format == "parquet":
+        index = pd.read_parquet(os.path.join(save_dir, 'index.parq'))
+        files = glob(os.path.join(save_dir, "*.parq"))
+        lc_files = list(filter(lambda i: os.path.basename(i) != "index.parq", files))
+        data = pd.concat(pd.read_parquet(file) for file in lc_files)
+
+    elif file_format == "pickle":
+        index = pd.read_pickle(os.path.join(save_dir, 'index.pkl'))
+        lc_files = glob(os.path.join(save_dir, "*.pkl"))
+        lc_files = list(filter(lambda i: os.path.basename(i) != "index.pkl", files))
+        data = pd.concat(pd.read_pickle(file) for file in lc_files)
+
+    elif file_format == "csv":
+        index = pd.read_csv(os.path.join(save_dir, 'index.csv'))
+        lc_files = glob(os.path.join(save_dir, "*.csv"))
+        lc_files = list(filter(lambda i: os.path.basename(i) != "index.csv", files))
+        data = pd.concat(pd.read_csv(file) for file in lc_files)
+
+    else:
+        raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
+
+    id_col = 'asas_sn_id' if 'asas_sn_id' in index.columns else 'name'
+    return LightCurveCollection(data, index, id_col)

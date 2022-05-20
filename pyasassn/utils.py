@@ -3,7 +3,6 @@ import numpy as np
 import os
 from astropy.timeseries import LombScargle
 import matplotlib.pyplot as plt
-import sqlalchemy
 
 
 class LightCurveCollection(object):
@@ -87,16 +86,46 @@ class LightCurveCollection(object):
     def __len__(self):
         return len(self.catalog_info)
 
-    def save(self, save_dir):
+    def save(self, save_dir, file_format='parquet', include_index=True):
         """
         Saves entire light curve collection to a given directory.
 
         :param save_dir: directory name
-        :return: void
+        :param file_format: file format of saved objects ['parquet', 'csv', 'pickle']
+        :param include_index: whether or not to save index (catalog_info)
+        :return: filenames
         """
-        self.catalog_info.to_csv(os.path.join(save_dir, "index.csv"), index=False)
-        for lc in self.itercurves():
-            lc.save(os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.csv"))
+        filenames = []
+        if file_format == 'parquet':
+            if include_index:
+                self.catalog_info.to_parquet(os.path.join(save_dir, 'index.parq'))
+                filenames.append('index.parq')
+            for lc in self.itercurves():
+                file = os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.parq")
+                lc.save(file, file_format='parquet')
+                filenames.append(file)
+
+        elif file_format == 'pickle':
+            if include_index:
+                self.catalog_info.to_pickle(os.path.join(save_dir, 'index.pkl'))
+                filenames.append('index.pkl')
+            for lc in self.itercurves():
+                file = os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.pkl")
+                lc.save(file, file_format='pickle')
+                filenames.append(file)
+
+        elif file_format == 'csv':
+            if include_index:
+                self.catalog_info.to_csv(os.path.join(save_dir, "index.csv"), index=False)
+                filenames.append('index.csv')
+            for lc in self.itercurves():
+                file = os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.csv")
+                lc.save(file, file_format='csv')
+                filenames.append(file)
+        else:
+            raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
+
+        return filenames
 
 
 class LightCurve:
@@ -117,17 +146,25 @@ class LightCurve:
             raise AttributeError("Must have 'jd'(julian date), 'mag' and 'mag_err'")
 
 
-    def save(self, filename):
+    def save(self, filename, file_format='parquet'):
         """
         Save the light curve to csv.
 
         :param filename: filename to save this light curve.
+        :param file_format: file format of saved objects ['parquet', 'csv', 'pickle']
         :return: void
         """
-        with open(filename, "w+") as f:
-            f.write(f"# {self.meta.to_json(orient='records')[2:-2]}\n")
+        if file_format == 'parquet':
+            self.data.to_parquet(filename)
+        elif file_format == 'pickle':
+            self.data.to_pickle(filename)
+        elif file_format == 'csv':
+            with open(filename, "w+") as f:
+                f.write(f"# {self.meta.to_json(orient='records')[2:-2]}\n")
+            self.data.to_csv(filename, mode='a', index=False)
+        else:
+            raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
 
-        self.data.to_csv(filename, mode='a', index=False)
 
     def plot(self, figsize=(12,8), savefile=None, include_poor_images=False):
         """
