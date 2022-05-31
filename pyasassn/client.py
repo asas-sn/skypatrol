@@ -170,7 +170,7 @@ class SkyPatrolClient:
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
             return self._get_curves(query_hash, tar_ids, catalog, save_dir, file_format, threads)
 
-    def query_list(self, tar_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, download=False,
+    def query_list(self, target_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, download=False,
                    save_dir=None, file_format="parquet", threads=1):
         """
         Query the ASAS-SN Sky Patrol Input Catalogs for all targets with the given identifiers.
@@ -182,7 +182,7 @@ class SkyPatrolClient:
         Thus searching for light curves with a list of Gaia IDs would require catalog='stellar_main', id_col='gaia_id'.
         Our other input catalogs should be searched with id_col='name', or by columns giving alternative ids.
 
-        :param tar_ids: list of target ids for query; list
+        :param target_ids: list of target ids for query; list
         :param id_col: the column on the given catalog to search against; string
         :param catalog: which catalog are we searching
         :param cols: columns to return from the given input catalog;
@@ -221,12 +221,12 @@ class SkyPatrolClient:
         if id_col not in cols:
             cols.append(id_col)
 
-        if type(tar_ids) in [str, int]:
-            tar_ids = [tar_ids]
+        if type(target_ids) in [str, int]:
+            tar_ids = [target_ids]
 
         # Query API with list (POST METHOD)
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_targets/catalog_list"
-        response = requests.post(url, json={'tar_ids': tar_ids,
+        response = requests.post(url, json={'tar_ids': target_ids,
                                             'catalog': catalog,
                                             'id_col': id_col,
                                             'cols': cols,
@@ -253,7 +253,7 @@ class SkyPatrolClient:
             tar_ids = list(tar_df[id_col])
 
             # Generate query information
-            query_id = f"listlen-{len(tar_ids)}_listfirst-{tar_ids[0]}_listend-{tar_ids[-1]}" \
+            query_id = f"listlen-{len(target_ids)}_listfirst-{target_ids[0]}_listend-{target_ids[-1]}" \
                        f"|catalog-{catalog}|id_col-{id_col}|cols-" + "/".join(cols)
             query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
 
