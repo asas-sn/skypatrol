@@ -1,0 +1,5 @@
+requests
+pandas
+pyarrow==4.0.1
+astropy
+numpy
