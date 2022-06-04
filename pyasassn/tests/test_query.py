@@ -20,13 +20,13 @@ def test_random_sample():
 
 def test_adql_query():
     query = """
-    SELECT TOP 100
+    SELECT
     * 
     FROM stellar_main 
-    WHERE DISTANCE(ra_deg, dec_deg, 270, -88) <= 5.1
+    WHERE DISTANCE(ra_deg, dec_deg, 270, -88) <= 0.05
     """
     res = client.adql_query(query)
-    assert len(res) == 100
+    assert len(res) > 0
 
 
 def test_list_query():
