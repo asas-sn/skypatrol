@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 from base64 import encodebytes
 from glob import glob
 import requests
@@ -9,6 +11,7 @@ import re
 import os
 import pyarrow as pa
 import warnings
+
 from .utils import LightCurveCollection
 
 

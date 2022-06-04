@@ -1,8 +1,11 @@
-import pandas as pd
-import numpy as np
+from __future__ import division, print_function
+
 import os
+
 from astropy.timeseries import LombScargle
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 
 class LightCurveCollection(object):
