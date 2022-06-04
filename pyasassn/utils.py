@@ -17,7 +17,9 @@ class LightCurveCollection(object):
         self.data = data
         self.catalog_info = catalog_info
 
-    def apply_function(self, func, col='mag', include_non_det=False, include_poor_images=False):
+    def apply_function(
+        self, func, col="mag", include_non_det=False, include_poor_images=False
+    ):
         """
         Apply a custom aggregate function to all light curves in the collection.
 
@@ -31,9 +33,9 @@ class LightCurveCollection(object):
         # Filter preferences for this function call only
         data = self.data
         if not include_non_det:
-            data = data[data['mag_err'] < 99]
+            data = data[data["mag_err"] < 99]
         if not include_poor_images:
-            data = data[data['quality'] == 'G']
+            data = data[data["quality"] == "G"]
 
         return data.groupby(self.id_col).agg({col: func})
 
@@ -49,13 +51,14 @@ class LightCurveCollection(object):
         # Filter preferences for this function call only
         data = self.data
         if not include_non_det:
-            data = data[data['mag_err'] < 99]
+            data = data[data["mag_err"] < 99]
         if not include_poor_images:
-            data = data[data['quality'] == 'G']
+            data = data[data["quality"] == "G"]
 
-        return data.groupby(self.id_col).agg(mean_mag=('mag', 'mean'),
-                                             std_mag=('mag', 'std'),
-                                             epochs=('mag', 'count'))
+        return data.groupby(self.id_col).agg(
+            mean_mag=("mag", "mean"), std_mag=("mag", "std"), epochs=("mag", "count")
+        )
+
     def __getitem__(self, item):
         if type(item) == pd.Series or type(item) == list or type(item) == np.ndarray:
             data = self.data[self.data[self.id_col] in item]
@@ -71,7 +74,6 @@ class LightCurveCollection(object):
         data = self.data[self.data[self.id_col] == key]
         return LightCurve(data, meta)
 
-
     def itercurves(self):
         """
         Generator to iterate through all light curves in the collection.
@@ -86,7 +88,7 @@ class LightCurveCollection(object):
     def __len__(self):
         return len(self.catalog_info)
 
-    def save(self, save_dir, file_format='parquet', include_index=True):
+    def save(self, save_dir, file_format="parquet", include_index=True):
         """
         Saves entire light curve collection to a given directory.
 
@@ -96,34 +98,38 @@ class LightCurveCollection(object):
         :return: filenames
         """
         filenames = []
-        if file_format == 'parquet':
+        if file_format == "parquet":
             if include_index:
-                self.catalog_info.to_parquet(os.path.join(save_dir, 'index.parq'))
-                filenames.append('index.parq')
+                self.catalog_info.to_parquet(os.path.join(save_dir, "index.parq"))
+                filenames.append("index.parq")
             for lc in self.itercurves():
                 file = os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.parq")
-                lc.save(file, file_format='parquet')
+                lc.save(file, file_format="parquet")
                 filenames.append(file)
 
-        elif file_format == 'pickle':
+        elif file_format == "pickle":
             if include_index:
-                self.catalog_info.to_pickle(os.path.join(save_dir, 'index.pkl'))
-                filenames.append('index.pkl')
+                self.catalog_info.to_pickle(os.path.join(save_dir, "index.pkl"))
+                filenames.append("index.pkl")
             for lc in self.itercurves():
                 file = os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.pkl")
-                lc.save(file, file_format='pickle')
+                lc.save(file, file_format="pickle")
                 filenames.append(file)
 
-        elif file_format == 'csv':
+        elif file_format == "csv":
             if include_index:
-                self.catalog_info.to_csv(os.path.join(save_dir, "index.csv"), index=False)
-                filenames.append('index.csv')
+                self.catalog_info.to_csv(
+                    os.path.join(save_dir, "index.csv"), index=False
+                )
+                filenames.append("index.csv")
             for lc in self.itercurves():
                 file = os.path.join(save_dir, f"{lc.meta[self.id_col].values[0]}.csv")
-                lc.save(file, file_format='csv')
+                lc.save(file, file_format="csv")
                 filenames.append(file)
         else:
-            raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
+            raise ValueError(
+                f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']"
+            )
 
         return filenames
 
@@ -132,6 +138,7 @@ class LightCurve:
     """
     Object for analysing and visualizing ASAS-SN Sky Patrol light curves.
     """
+
     def __init__(self, pandas_obj, meta):
 
         self._validate(pandas_obj)
@@ -142,11 +149,14 @@ class LightCurve:
     @staticmethod
     def _validate(obj):
         # verify there is a column latitude and a column longitude
-        if 'jd' not in obj.columns or 'mag' not in obj.columns or 'mag_err' not in obj.columns:
+        if (
+            "jd" not in obj.columns
+            or "mag" not in obj.columns
+            or "mag_err" not in obj.columns
+        ):
             raise AttributeError("Must have 'jd'(julian date), 'mag' and 'mag_err'")
 
-
-    def save(self, filename, file_format='parquet'):
+    def save(self, filename, file_format="parquet"):
         """
         Save the light curve to csv.
 
@@ -154,19 +164,20 @@ class LightCurve:
         :param file_format: file format of saved objects ['parquet', 'csv', 'pickle']
         :return: void
         """
-        if file_format == 'parquet':
+        if file_format == "parquet":
             self.data.to_parquet(filename)
-        elif file_format == 'pickle':
+        elif file_format == "pickle":
             self.data.to_pickle(filename)
-        elif file_format == 'csv':
+        elif file_format == "csv":
             with open(filename, "w+") as f:
                 f.write(f"# {self.meta.to_json(orient='records')[2:-2]}\n")
-            self.data.to_csv(filename, mode='a', index=False)
+            self.data.to_csv(filename, mode="a", index=False)
         else:
-            raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
+            raise ValueError(
+                f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']"
+            )
 
-
-    def plot(self, figsize=(12,8), savefile=None, include_poor_images=False):
+    def plot(self, figsize=(12, 8), savefile=None, include_poor_images=False):
         """
         Plots the given light curve with error bars.
 
@@ -178,39 +189,54 @@ class LightCurve:
         # Filter preferences
         data = self.data
         if not include_poor_images:
-            data = data[data['quality'] == 'G']
+            data = data[data["quality"] == "G"]
 
         errors = data.mag_err > 99
 
         plt.figure(figsize=figsize)
-        plt.errorbar(x=data[~errors].jd - 2450000,
-                     y=data[~errors].mag,
-                     yerr=data[~errors].mag_err,
-                     fmt="o",
-                     c="teal",
-                     label="detections")
-        plt.errorbar(x=data[errors].jd - 2450000,
-                     y=data[errors].mag,
-                     fmt="v",
-                     c="red",
-                     label="non-detections")
+        plt.errorbar(
+            x=data[~errors].jd - 2450000,
+            y=data[~errors].mag,
+            yerr=data[~errors].mag_err,
+            fmt="o",
+            c="teal",
+            label="detections",
+        )
+        plt.errorbar(
+            x=data[errors].jd - 2450000,
+            y=data[errors].mag,
+            fmt="v",
+            c="red",
+            label="non-detections",
+        )
         self._label_plots()
         plt.legend()
         plt.xlabel("Date (JD-2450000)")
         plt.ylabel("Magnitude")
         plt.gca().invert_yaxis()
 
-
         if savefile:
             plt.savefig(savefile)
         else:
             plt.show()
 
-
-    def lomb_scargle(self, fit_mean=True, center_data=True, nterms=1, normalization='standard',
-                     minimum_frequency=0.001, maximum_frequency=25, method='auto', samples_per_peak=5,
-                     nyquist_factor=5, plot=True, figsize=(12,8), savefile=None,
-                     include_poor_images=False, include_non_det=False):
+    def lomb_scargle(
+        self,
+        fit_mean=True,
+        center_data=True,
+        nterms=1,
+        normalization="standard",
+        minimum_frequency=0.001,
+        maximum_frequency=25,
+        method="auto",
+        samples_per_peak=5,
+        nyquist_factor=5,
+        plot=True,
+        figsize=(12, 8),
+        savefile=None,
+        include_poor_images=False,
+        include_non_det=False,
+    ):
         """
         Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
         light curve. Default values work for most variable sources.
@@ -249,22 +275,27 @@ class LightCurve:
         # Filter preferences for this function call only
         data = self.data
         if not include_non_det:
-            data = data[data['mag_err'] < 99]
+            data = data[data["mag_err"] < 99]
         if not include_poor_images:
-            data = data[data['quality'] == 'G']
+            data = data[data["quality"] == "G"]
 
-        ls = LombScargle(data.jd, data.mag,
-                         fit_mean=fit_mean,
-                         center_data=center_data,
-                         nterms=nterms,
-                         normalization=normalization)
+        ls = LombScargle(
+            data.jd,
+            data.mag,
+            fit_mean=fit_mean,
+            center_data=center_data,
+            nterms=nterms,
+            normalization=normalization,
+        )
 
-        frequency, power = ls.autopower(minimum_frequency=minimum_frequency,
-                                        maximum_frequency=maximum_frequency,
-                                        method=method,
-                                        samples_per_peak=samples_per_peak,
-                                        nyquist_factor=nyquist_factor,
-                                        normalization=normalization)
+        frequency, power = ls.autopower(
+            minimum_frequency=minimum_frequency,
+            maximum_frequency=maximum_frequency,
+            method=method,
+            samples_per_peak=samples_per_peak,
+            nyquist_factor=nyquist_factor,
+            normalization=normalization,
+        )
         if plot:
             plt.figure(figsize=figsize)
 
@@ -279,8 +310,17 @@ class LightCurve:
                 plt.show()
         return frequency, power, ls
 
-    def find_period(self, frequency, power, best_frequency=None, plot=True, figsize=(12,8), savefile=None,
-                    include_poor_images=False, include_non_det=False):
+    def find_period(
+        self,
+        frequency,
+        power,
+        best_frequency=None,
+        plot=True,
+        figsize=(12, 8),
+        savefile=None,
+        include_poor_images=False,
+        include_non_det=False,
+    ):
         """
         Find the period of the light curve given the power spectrum produced by lomb_scargle.
         Also produces a phase-folded plot of the light curve.
@@ -298,10 +338,9 @@ class LightCurve:
         # Filter preferences for this function call only
         data = self.data
         if not include_non_det:
-            data = data[data['mag_err'] < 99]
+            data = data[data["mag_err"] < 99]
         if not include_poor_images:
-            data = data[data['quality'] == 'G']
-
+            data = data[data["quality"] == "G"]
 
         if best_frequency is None:
             best_frequency = frequency[np.argmax(power)]
@@ -330,17 +369,16 @@ class LightCurve:
 
         return period
 
-
     def _label_plots(self):
         suptitle = ""
         title = ""
-        if 'asas_sn_id' in self.meta.columns:
+        if "asas_sn_id" in self.meta.columns:
             suptitle += f"SkyPatrol ID: {self.meta.asas_sn_id.item()}"
-        if 'name' in self.meta.columns:
+        if "name" in self.meta.columns:
             suptitle += f"\nSource Name: {self.meta.name.item()}"
-        if 'ra_deg' in self.meta.columns:
+        if "ra_deg" in self.meta.columns:
             title += f"Right Ascention: {self.meta.ra_deg.item():.05f}"
-        if 'dec_deg' in self.meta.columns:
+        if "dec_deg" in self.meta.columns:
             title += f"\nDeclination: {self.meta.dec_deg.item():.05f}"
 
         title += f"\nEpochs: {self.epochs}"

@@ -21,6 +21,7 @@ class SkyPatrolClient:
         on astronomical targets, or they will be returned as LightCurveCollections containing photometry data from all
         queried targets.
     """
+
     def __init__(self, verbose=True):
         """
         Creates SkyPatrolClient object
@@ -41,7 +42,9 @@ class SkyPatrolClient:
         except ConnectionError as e:
             raise ConnectionError("Unable to connect to ASAS-SN Servers")
 
-    def adql_query(self, query_str, download=False, save_dir=None, file_format="parquet", threads=1):
+    def adql_query(
+        self, query_str, download=False, save_dir=None, file_format="parquet", threads=1
+    ):
         """
         Query the ASAS-SN Sky Patrol Input Catalogs with an ADQL string.
         See README.md for more on accepted ADQL context and functions.
@@ -63,17 +66,16 @@ class SkyPatrolClient:
             raise ValueError("'query_str' must me string value")
 
         # Trim ADQL input
-        query_str = re.sub(r'(\s+)', ' ', query_str)
-        query_hash = encodebytes(bytes(query_str, encoding='utf-8')).decode()
+        query_str = re.sub(r"(\s+)", " ", query_str)
+        query_hash = encodebytes(bytes(query_str, encoding="utf-8")).decode()
 
         # Query Flask API with SQL bytes
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_sql/{query_hash}"
-        response = requests.post(url, json={'format': 'arrow',
-                                            'download': download})
+        response = requests.post(url, json={"format": "arrow", "download": download})
 
         # Check response
         if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
+            error = json.loads(response.content)["error_text"]
             raise RuntimeError(error)
 
         # Deserialize from arrow
@@ -87,13 +89,26 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
-            tar_ids = list(tar_df['asas_sn_id'])
+            tar_ids = list(tar_df["asas_sn_id"])
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
-            return self._get_curves(query_hash, tar_ids, "extrasolar", save_dir, file_format, threads)
+            return self._get_curves(
+                query_hash, tar_ids, "extrasolar", save_dir, file_format, threads
+            )
 
-    def cone_search(self, ra_deg, dec_deg, radius, units='deg', catalog='master_list', cols=None,
-                    download=False, save_dir=None, file_format="parquet", threads=1):
+    def cone_search(
+        self,
+        ra_deg,
+        dec_deg,
+        radius,
+        units="deg",
+        catalog="master_list",
+        cols=None,
+        download=False,
+        save_dir=None,
+        file_format="parquet",
+        threads=1,
+    ):
         """
         Query the ASAS-SN Sky Patrol Input Catalogs for all targets within a cone of the sky.
         Does NOT return solar system targets (i.e. asteroids and coma).
@@ -122,16 +137,21 @@ class SkyPatrolClient:
             raise ValueError("'download' must be boolean value")
         if type(threads) is not int:
             raise ValueError("'threads' must be integer value")
-        if catalog not in self.catalogs.catalog_names() or catalog in ['asteroids', 'comets']:
+        if catalog not in self.catalogs.catalog_names() or catalog in [
+            "asteroids",
+            "comets",
+        ]:
             raise ValueError("invalid catalog")
         if cols is None:
-            cols = ['asas_sn_id', 'ra_deg', 'dec_deg']
-            if catalog not in ['stellar_main', 'master_list']:
-                cols.append('name')
-            elif catalog == 'master_list':
-                cols.append('catalog_sources')
-        if set(cols).issubset(set(self.catalogs[catalog]['col_names'])) is False:
-            raise ValueError("one or more of the listed cols is not a column name in the selected catalog")
+            cols = ["asas_sn_id", "ra_deg", "dec_deg"]
+            if catalog not in ["stellar_main", "master_list"]:
+                cols.append("name")
+            elif catalog == "master_list":
+                cols.append("catalog_sources")
+        if set(cols).issubset(set(self.catalogs[catalog]["col_names"])) is False:
+            raise ValueError(
+                "one or more of the listed cols is not a column name in the selected catalog"
+            )
 
         # Change units
         if units != "deg":
@@ -139,14 +159,19 @@ class SkyPatrolClient:
 
         # Query the Flask server API for cone
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_cone/radius{radius}_ra{ra_deg}_dec{dec_deg}"
-        response = requests.post(url, json={'catalog': catalog,
-                                            'cols': cols,
-                                            'format': 'arrow',
-                                            'download': download})
+        response = requests.post(
+            url,
+            json={
+                "catalog": catalog,
+                "cols": cols,
+                "format": "arrow",
+                "download": download,
+            },
+        )
 
         # Check response
         if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
+            error = json.loads(response.content)["error_text"]
             raise RuntimeError(error)
 
         # Deserialize from arrow
@@ -160,18 +185,32 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Generate query information
-            query_id = f"conectr-{radius}_conera-{ra_deg}_conedec-{dec_deg}|catalog-{catalog}|cols-" + "/".join(cols)
-            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
+            query_id = (
+                f"conectr-{radius}_conera-{ra_deg}_conedec-{dec_deg}|catalog-{catalog}|cols-"
+                + "/".join(cols)
+            )
+            query_hash = encodebytes(bytes(query_id, encoding="utf-8")).decode()
 
             # Get lightcurve ids to pull
-            id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
             tar_ids = list(tar_df[id_col])
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
-            return self._get_curves(query_hash, tar_ids, catalog, save_dir, file_format, threads)
+            return self._get_curves(
+                query_hash, tar_ids, catalog, save_dir, file_format, threads
+            )
 
-    def query_list(self, target_ids,  id_col='asas_sn_id', catalog='master_list', cols=None, download=False,
-                   save_dir=None, file_format="parquet", threads=1):
+    def query_list(
+        self,
+        target_ids,
+        id_col="asas_sn_id",
+        catalog="master_list",
+        cols=None,
+        download=False,
+        save_dir=None,
+        file_format="parquet",
+        threads=1,
+    ):
         """
         Query the ASAS-SN Sky Patrol Input Catalogs for all targets with the given identifiers.
         to view the available list of catalogs and identifiers see SkyPatrolClient.catalogs.
@@ -207,17 +246,19 @@ class SkyPatrolClient:
         if id_col not in list(self.catalogs[catalog]["col_names"]):
             raise ValueError("invalid column")
         # Set default columns
-        if cols is None and catalog not in ['asteroids', 'comets']:
-            cols = ['asas_sn_id', 'ra_deg', 'dec_deg']
-            if catalog not in ['stellar_main', 'master_list']:
-                cols.append('name')
-            elif catalog == 'master_list':
-                cols.append('catalog_sources')
-        if cols is None and catalog in ['asteroids', 'comets']:
-            cols = ['name']
+        if cols is None and catalog not in ["asteroids", "comets"]:
+            cols = ["asas_sn_id", "ra_deg", "dec_deg"]
+            if catalog not in ["stellar_main", "master_list"]:
+                cols.append("name")
+            elif catalog == "master_list":
+                cols.append("catalog_sources")
+        if cols is None and catalog in ["asteroids", "comets"]:
+            cols = ["name"]
         # Ensure valid columns
-        if set(cols).issubset(set(self.catalogs[catalog]['col_names'])) is False:
-            raise ValueError("one or more of the listed cols is not a column name in the selected catalog")
+        if set(cols).issubset(set(self.catalogs[catalog]["col_names"])) is False:
+            raise ValueError(
+                "one or more of the listed cols is not a column name in the selected catalog"
+            )
         if id_col not in cols:
             cols.append(id_col)
 
@@ -226,16 +267,21 @@ class SkyPatrolClient:
 
         # Query API with list (POST METHOD)
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_targets/catalog_list"
-        response = requests.post(url, json={'tar_ids': target_ids,
-                                            'catalog': catalog,
-                                            'id_col': id_col,
-                                            'cols': cols,
-                                            'format': 'arrow',
-                                            'download': download})
+        response = requests.post(
+            url,
+            json={
+                "tar_ids": target_ids,
+                "catalog": catalog,
+                "id_col": id_col,
+                "cols": cols,
+                "format": "arrow",
+                "download": download,
+            },
+        )
 
         # Check response
         if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
+            error = json.loads(response.content)["error_text"]
             raise RuntimeError(error)
 
         # Deserialize from arrow
@@ -249,19 +295,31 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
-            id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
             tar_ids = list(tar_df[id_col])
 
             # Generate query information
-            query_id = f"listlen-{len(target_ids)}_listfirst-{target_ids[0]}_listend-{target_ids[-1]}" \
-                       f"|catalog-{catalog}|id_col-{id_col}|cols-" + "/".join(cols)
-            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
+            query_id = (
+                f"listlen-{len(target_ids)}_listfirst-{target_ids[0]}_listend-{target_ids[-1]}"
+                f"|catalog-{catalog}|id_col-{id_col}|cols-" + "/".join(cols)
+            )
+            query_hash = encodebytes(bytes(query_id, encoding="utf-8")).decode()
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
-            return self._get_curves(query_hash, tar_ids, catalog, save_dir, file_format, threads)
+            return self._get_curves(
+                query_hash, tar_ids, catalog, save_dir, file_format, threads
+            )
 
-    def random_sample(self, n, catalog='master_list', cols=None, download=False, save_dir=None,
-                      file_format="parquet", threads=1):
+    def random_sample(
+        self,
+        n,
+        catalog="master_list",
+        cols=None,
+        download=False,
+        save_dir=None,
+        file_format="parquet",
+        threads=1,
+    ):
         """
         Get n random targets from the ASAS-SN Sky Patrol Input Catalogs.
 
@@ -285,17 +343,19 @@ class SkyPatrolClient:
         if catalog not in self.catalogs.catalog_names():
             raise ValueError("invalid catalog")
         # Set default columns
-        if cols is None and catalog not in ['asteroids', 'comets']:
-            cols = ['asas_sn_id', 'ra_deg', 'dec_deg']
-            if catalog not in ['stellar_main', 'master_list']:
-                cols.append('name')
-            elif catalog == 'master_list':
-                cols.append('catalog_sources')
-        if cols is None and catalog in ['asteroids', 'comets']:
-            cols = ['name']
+        if cols is None and catalog not in ["asteroids", "comets"]:
+            cols = ["asas_sn_id", "ra_deg", "dec_deg"]
+            if catalog not in ["stellar_main", "master_list"]:
+                cols.append("name")
+            elif catalog == "master_list":
+                cols.append("catalog_sources")
+        if cols is None and catalog in ["asteroids", "comets"]:
+            cols = ["name"]
         # Ensure valid columns
-        if set(cols).issubset(set(self.catalogs[catalog]['col_names'])) is False:
-            raise ValueError("one or more of the listed cols is not a column name in the selected catalog")
+        if set(cols).issubset(set(self.catalogs[catalog]["col_names"])) is False:
+            raise ValueError(
+                "one or more of the listed cols is not a column name in the selected catalog"
+            )
 
         # Limit sample length
         if n >= 1000000:
@@ -303,14 +363,19 @@ class SkyPatrolClient:
 
         # Query API with list (POST METHOD)
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_targets/random_{n}"
-        response = requests.post(url, json={'catalog': catalog,
-                                            'cols': cols,
-                                            'format': 'arrow',
-                                            'download': download})
+        response = requests.post(
+            url,
+            json={
+                "catalog": catalog,
+                "cols": cols,
+                "format": "arrow",
+                "download": download,
+            },
+        )
 
         # Check response
         if response.status_code == 400:
-            error = json.loads(response.content)['error_text']
+            error = json.loads(response.content)["error_text"]
             raise RuntimeError(error)
 
         # Deserialize from arrow
@@ -324,25 +389,33 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
-            id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
             tar_ids = list(tar_df[id_col])
 
             # Generate query information
             query_id = f"random-{n}|catalog-{catalog}|cols-" + "/".join(cols)
-            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
+            query_hash = encodebytes(bytes(query_id, encoding="utf-8")).decode()
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
-            return self._get_curves(query_hash, tar_ids, catalog, save_dir, file_format, threads)
+            return self._get_curves(
+                query_hash, tar_ids, catalog, save_dir, file_format, threads
+            )
 
-    def _get_curves(self, query_hash, tar_ids, catalog, save_dir, file_format, threads=1):
+    def _get_curves(
+        self, query_hash, tar_ids, catalog, save_dir, file_format, threads=1
+    ):
         # Get number of id chunks
         n_chunks = int(np.ceil(len(tar_ids) / 1000))
         self._verbose_print("Downloading Curves...")
         # Get targets via mutlithreaded requests
         with multiprocessing.Pool(processes=threads) as pool:
-            results = [pool.apply_async(self._get_lightcurve_chunk,
-                                        args=(query_hash, idx, catalog, save_dir, file_format,))
-                       for idx in range(n_chunks)]
+            results = [
+                pool.apply_async(
+                    self._get_lightcurve_chunk,
+                    args=(query_hash, idx, catalog, save_dir, file_format,),
+                )
+                for idx in range(n_chunks)
+            ]
 
             chunks = []
             count = 0
@@ -350,29 +423,34 @@ class SkyPatrolClient:
                 data, n = r.get()
                 chunks.append(data)
                 count += n
-                self._verbose_print(f"Pulled {count:,} of {len(self.index):,}", end="\r")
+                self._verbose_print(
+                    f"Pulled {count:,} of {len(self.index):,}", end="\r"
+                )
 
             self._verbose_print("")
         if save_dir is not None:
             # Return list of filenames
-            return  [file for chunk in chunks for file in chunk]
+            return [file for chunk in chunks for file in chunk]
         else:
             # Return in memory data as LightCurveCollection
             data = pd.concat(chunks)
-            id_col = 'asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
             return LightCurveCollection(data, self.index, id_col)
 
-
-    def _get_lightcurve_chunk(self, query_hash, block_idx, catalog, save_dir, file_format):
+    def _get_lightcurve_chunk(
+        self, query_hash, block_idx, catalog, save_dir, file_format
+    ):
         # Query API with (POST METHOD)
         server = (block_idx % 3) + 1
-        url = f"http://asassn-data{server:02d}.ifa.hawaii.edu:9006/get_block/" \
-              f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
+        url = (
+            f"http://asassn-data{server:02d}.ifa.hawaii.edu:9006/get_block/"
+            f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
+        )
         response = requests.get(url)
 
         # Pandas dataframe
         data = _deserialize(response)
-        id_col ='asas_sn_id' if catalog not in ['asteroids', 'comets'] else 'name'
+        id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
         count = len(data[id_col].unique())
         # Write to disk or return in memory
         if save_dir is not None:
@@ -382,14 +460,16 @@ class SkyPatrolClient:
             return data, count
 
     def _save_index(self, save_dir, file_format):
-        if file_format == 'parquet':
-            self.index.to_parquet(os.path.join(save_dir, 'index.parq'))
-        elif file_format == 'pickle':
-            self.index.to_pickle(os.path.join(save_dir, 'index.pkl'))
-        elif file_format == 'csv':
+        if file_format == "parquet":
+            self.index.to_parquet(os.path.join(save_dir, "index.parq"))
+        elif file_format == "pickle":
+            self.index.to_pickle(os.path.join(save_dir, "index.pkl"))
+        elif file_format == "csv":
             self.index.to_csv(os.path.join(save_dir, "index.csv"), index=False)
         else:
-            raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
+            raise ValueError(
+                f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']"
+            )
 
     def _verbose_print(self, msg, end="\n"):
         if self.verbose:
@@ -410,22 +490,26 @@ class SkyPatrolClient:
         def __str__(self):
             rep_str = "\n"
             for table_name, df in self.__dict__.items():
-                if table_name == 'counts':
+                if table_name == "counts":
                     continue
-                rep_str += f"Table Name:  {table_name}\n" \
-                           f"Num Columns: {len(df)}\n" \
-                           f"Num Targets: {self.counts[table_name]}" \
-                           f"{df.head(10)}\n\n"
+                rep_str += (
+                    f"Table Name:  {table_name}\n"
+                    f"Num Columns: {len(df)}\n"
+                    f"Num Targets: {self.counts[table_name]}"
+                    f"{df.head(10)}\n\n"
+                )
             return rep_str
 
         def __repr__(self):
             rep_str = "\n"
             for table_name, df in self.__dict__.items():
-                if table_name == 'counts':
+                if table_name == "counts":
                     continue
-                rep_str += f"Table Name:  {table_name}\n" \
-                           f"Num Columns: {len(df)}\n" \
-                           f"Num Targets: {self.counts[table_name]}\n\n"
+                rep_str += (
+                    f"Table Name:  {table_name}\n"
+                    f"Num Columns: {len(df)}\n"
+                    f"Num Targets: {self.counts[table_name]}\n\n"
+                )
             return rep_str
 
         def catalog_names(self):
@@ -436,7 +520,6 @@ class SkyPatrolClient:
             """
             return self.__dict__.keys()
 
-
         def __getitem__(self, item):
             return self.__dict__[item]
 
@@ -444,7 +527,7 @@ class SkyPatrolClient:
 def _deserialize(response):
     # Deserialize from arrow
     with warnings.catch_warnings():
-        warnings.simplefilter(action='ignore', category=FutureWarning)
+        warnings.simplefilter(action="ignore", category=FutureWarning)
         buff = pa.py_buffer(response.content)
         return pa.deserialize(buff)
 
@@ -457,15 +540,15 @@ def _arc_to_deg(arc, unit):
     :param unit: 'arcmin' or 'arcsec'
     :return: decimal degrees
     """
-    if unit == 'arcmin':
+    if unit == "arcmin":
         return arc / 60
-    elif unit == 'arcsec':
+    elif unit == "arcsec":
         return arc / 3600
     else:
         raise ValueError("unit not in ['arcmin', 'arcsec']")
 
 
-def load_collection(save_dir, file_format='parquet'):
+def load_collection(save_dir, file_format="parquet"):
     """
     Loads a LightCurveCollection from directory.
     Requires an index and light curve files saved from previous collection
@@ -474,25 +557,27 @@ def load_collection(save_dir, file_format='parquet'):
     :return: LightCurveCollection
     """
     if file_format == "parquet":
-        index = pd.read_parquet(os.path.join(save_dir, 'index.parq'))
+        index = pd.read_parquet(os.path.join(save_dir, "index.parq"))
         files = glob(os.path.join(save_dir, "*.parq"))
         lc_files = list(filter(lambda i: os.path.basename(i) != "index.parq", files))
         data = pd.concat(pd.read_parquet(file) for file in lc_files)
 
     elif file_format == "pickle":
-        index = pd.read_pickle(os.path.join(save_dir, 'index.pkl'))
+        index = pd.read_pickle(os.path.join(save_dir, "index.pkl"))
         lc_files = glob(os.path.join(save_dir, "*.pkl"))
         lc_files = list(filter(lambda i: os.path.basename(i) != "index.pkl", files))
         data = pd.concat(pd.read_pickle(file) for file in lc_files)
 
     elif file_format == "csv":
-        index = pd.read_csv(os.path.join(save_dir, 'index.csv'))
+        index = pd.read_csv(os.path.join(save_dir, "index.csv"))
         lc_files = glob(os.path.join(save_dir, "*.csv"))
         lc_files = list(filter(lambda i: os.path.basename(i) != "index.csv", files))
         data = pd.concat(pd.read_csv(file) for file in lc_files)
 
     else:
-        raise ValueError(f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']")
+        raise ValueError(
+            f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']"
+        )
 
-    id_col = 'asas_sn_id' if 'asas_sn_id' in index.columns else 'name'
+    id_col = "asas_sn_id" if "asas_sn_id" in index.columns else "name"
     return LightCurveCollection(data, index, id_col)
