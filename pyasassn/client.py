@@ -73,10 +73,7 @@ class SkyPatrolClient:
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_sql/{query_hash}"
         response = requests.post(url, json={"format": "arrow", "download": download})
 
-        # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)["error_text"]
-            raise RuntimeError(error)
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -170,9 +167,7 @@ class SkyPatrolClient:
         )
 
         # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)["error_text"]
-            raise RuntimeError(error)
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -280,9 +275,7 @@ class SkyPatrolClient:
         )
 
         # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)["error_text"]
-            raise RuntimeError(error)
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -374,9 +367,7 @@ class SkyPatrolClient:
         )
 
         # Check response
-        if response.status_code == 400:
-            error = json.loads(response.content)["error_text"]
-            raise RuntimeError(error)
+        self._validate_response(response)
 
         # Deserialize from arrow
         tar_df = _deserialize(response)
@@ -522,6 +513,14 @@ class SkyPatrolClient:
 
         def __getitem__(self, item):
             return self.__dict__[item]
+
+        def _validate_response(self, response):
+            """
+            Validate the response before deserialization
+            """
+            # If the response is not an error (4xx, 5xx), it is true
+            if not response:
+                response.raise_for_status()
 
 
 def _deserialize(response):
