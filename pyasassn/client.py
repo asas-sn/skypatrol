@@ -290,9 +290,6 @@ class SkyPatrolClient:
         else:
             if save_dir:
                 self._save_index(save_dir, file_format)
-            # Get lightcurve ids to pull
-            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
-            tar_ids = list(tar_df[id_col])
 
             # Generate query information
             query_id = (
@@ -300,6 +297,10 @@ class SkyPatrolClient:
                 f"|catalog-{catalog}|id_col-{id_col}|cols-" + "/".join(cols)
             )
             query_hash = encodebytes(bytes(query_id, encoding="utf-8")).decode()
+
+            # Get lightcurve ids to pull
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
+            tar_ids = list(tar_df[id_col])
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
             return self._get_curves(
