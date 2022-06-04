@@ -2,6 +2,8 @@
 
 ![ASAS-SN](./imgs/logo.jpg)
 
+![example workflow](https://github.com/asas-sn/skypatrol/actions/workflows/tests/badge.svg)
+
 The pyasassn client allows users to query the ASAS-SN input catalog and retrieve light curves from our database. These light curves are subject to live updates as we are running continuous photometry on our nightly images.
 
 
