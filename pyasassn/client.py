@@ -466,6 +466,14 @@ class SkyPatrolClient:
         if self.verbose:
             print(msg, end=end, flush=True)
 
+    def _validate_response(self, response):
+        """
+        Validate the response before deserialization
+        """
+        # If the response is not an error (4xx, 5xx), it is true
+        if not response:
+            response.raise_for_status()
+
     class InputCatalogs(object):
         """
         Data structure for holding metadata on ASAS-SN Sky Patrol's input catalogs.
@@ -513,14 +521,6 @@ class SkyPatrolClient:
 
         def __getitem__(self, item):
             return self.__dict__[item]
-
-        def _validate_response(self, response):
-            """
-            Validate the response before deserialization
-            """
-            # If the response is not an error (4xx, 5xx), it is true
-            if not response:
-                response.raise_for_status()
 
 
 def _deserialize(response):
