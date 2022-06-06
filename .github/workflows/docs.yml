@@ -20,7 +20,7 @@ jobs:
         sudo apt install pandoc
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install sphinx nbsphinx sphinx_rtd_theme pygments ipython
+        pip install sphinx nbsphinx sphinx_rtd_theme pygments ipython sphinx-book-theme
 
     # BUILD DOCS
     - name: Build

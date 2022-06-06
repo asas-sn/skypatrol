@@ -4,9 +4,8 @@
    contain the root `toctree` directive.
 
 
-Welcome to the ASAS-SN Sky Patrol Project!
+ASAS-SN Sky Patrol
 ==========================================
-.. image :: /_static/asas_sn_logo1.png
 
 The All-Sky Automated Survey for Supernovae (ASAS-SN) project has been scanning the night sky for years in search of supernovae and other bright transients. With our worldwide network of robotic 14-cm telescopes we can image the enitre sky nightly down to 18.5 magnitudes (g-band). 
 
