@@ -18,12 +18,14 @@ from setuptools import setup, Extension
 with open("requirements.txt") as f:
     install_requires = f.read().splitlines()
 
-setup(name='pyasassn',
-      version='0.6.4',
-      url="https://github.com/asas_sn/skypatrol/",
-      author='Kyle Hart',
-      author_email='kylehart@hawaii.edu',
-      license='GPL v.3',
-      packages=['pyasassn'],
-      install_requires=install_requires,
-      zip_safe=False)
+setup(
+    name="skypatrol",
+    version="0.6.4",
+    url="https://github.com/asas_sn/skypatrol/",
+    author="Kyle Hart",
+    author_email="kylehart@hawaii.edu",
+    license="GPL v.3",
+    packages=["pyasassn"],
+    install_requires=install_requires,
+    zip_safe=False,
+)
