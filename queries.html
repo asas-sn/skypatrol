@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catalog Query Tools &mdash; pyasassn 0.5.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Light Curve Utilities" href="lightcurves.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyasassn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Catalog Query Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#cone-searches">Cone Searches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#random-samples">Random Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#catalog-id-lookups">Catalog ID Lookups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adql-queries">ADQL Queries</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lightcurves.html">Light Curve Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">Additional Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="website.html">Online GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyasassn.html">Code Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyasassn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Catalog Query Tools</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/queries.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="catalog-query-tools">
+<h1>Catalog Query Tools<a class="headerlink" href="#catalog-query-tools" title="Permalink to this heading"></a></h1>
+<p>To retreive ASAS-SN light curves you will need to query our input catalogs for the appropriate <strong>asas_sn_id</strong>.
+We have included tools for cone searches, ADQL queries, random samples, and external catalog ID lookups.</p>
+<section id="cone-searches">
+<h2>Cone Searches<a class="headerlink" href="#cone-searches" title="Permalink to this heading"></a></h2>
+<p>By leveraging state-of-the-art database technologies, ASAS-SN Sky Patrol allows users to run arbitrary cone searches for thousands of targets across the sky in mere seconds.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">cone_search</span><span class="p">(</span><span class="n">ra_deg</span><span class="o">=</span><span class="mi">270</span><span class="p">,</span> <span class="n">dec_deg</span><span class="o">=</span><span class="mi">88</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">catalog</span><span class="o">=</span><span class="s1">&#39;master_list&#39;</span><span class="p">)</span>
+
+<span class="go">         asas_sn_id      ra_deg    dec_deg      catalog_sources</span>
+<span class="go">0        8590494153  270.508480  84.120395  [stellar_main, tic]</span>
+<span class="go">1        8590493551  257.333476  84.119978  [stellar_main, tic]</span>
+<span class="go">2        8590494160  273.628334  84.120183  [stellar_main, tic]</span>
+<span class="go">3        8590494620  282.208531  84.120019  [stellar_main, tic]</span>
+<span class="go">4        8590493763  257.575614  84.119906  [stellar_main, tic]</span>
+<span class="gp">... </span>            <span class="o">...</span>         <span class="o">...</span>        <span class="o">...</span>                  <span class="o">...</span>
+<span class="go">82247  317828630672  272.518828  89.284092  [stellar_main, tic]</span>
+<span class="go">82248  317828630205    0.339976  89.284143  [stellar_main, tic]</span>
+<span class="go">82249  317828630428  142.968424  89.283984  [stellar_main, tic]</span>
+<span class="go">82250  317828630825  353.474920  89.284470  [stellar_main, tic]</span>
+<span class="go">82251  317828648971   71.616242  89.752714  [stellar_main, tic]</span>
+
+<span class="go">[82252 rows x 4 columns]</span>
+</pre></div>
+</div>
+<p>This function accepts both decimal-degree and ‘HH:MM:SS(.SS)”/”DD:MM:SS(.SS)” sexigesimal strings for RA and DEC respectively. Moreover, the default unit for the radius is ‘degrees’. For more see documentation.</p>
+</section>
+<section id="random-samples">
+<h2>Random Samples<a class="headerlink" href="#random-samples" title="Permalink to this heading"></a></h2>
+<p>If the user is interested in random samples of our data, we have included a utility just for them. Random samples upto 1 million targets can be taken from any of our input catalogs.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">catalog</span><span class="o">=</span><span class="s2">&quot;aavsovsx&quot;</span><span class="p">)</span>
+
+<span class="go">      asas_sn_id     ra_deg   dec_deg                          name</span>
+<span class="go">0         1090547  192.31758 -88.18822                  CSTAR 016836</span>
+<span class="go">1     17181184668  299.57819 -86.02709         WISE J195818.7-860137</span>
+<span class="go">2          506225  169.05404 -84.50047         WISE J111612.9-843001</span>
+<span class="go">3          518087  121.09946 -84.43044           ASAS J080423-8425.8</span>
+<span class="go">4          499034  175.15832 -84.10648  ASASSN-V J114038.00-840623.3</span>
+<span class="gp">... </span>           <span class="o">...</span>        <span class="o">...</span>       <span class="o">...</span>                           <span class="o">...</span>
+<span class="go">995  352188417258  329.85080 -42.80990                    HIP 108556</span>
+<span class="go">996  412317507889  263.86131 -42.64240  ASASSN-V J173526.71-423832.6</span>
+<span class="go">997  661427711166  133.33059 -42.64235           GDS_J0853193-423832</span>
+<span class="go">998  352187588956  118.38509 -42.64223  ASASSN-V J075332.42-423832.0</span>
+<span class="go">999  661427711168  253.03455 -42.64222    [HHR2012] J165208.3-423832</span>
+
+<span class="go">[1000 rows x 4 columns]</span>
+</pre></div>
+</div>
+</section>
+<section id="catalog-id-lookups">
+<h2>Catalog ID Lookups<a class="headerlink" href="#catalog-id-lookups" title="Permalink to this heading"></a></h2>
+<p>If the user is interested in a particular target or list of targets for which they already have an external ID, they can use our <strong>query_list</strong> function for direct lookups. To use this function, the user must specify the catalog and ID column they are searching against.</p>
+<p>For example, a user searching multiple TIC IDs would run the following code.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">my_tic_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6658326</span><span class="p">,</span> <span class="mi">46783395</span><span class="p">,</span> <span class="mi">1021890</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">query_list</span><span class="p">(</span><span class="n">my_tic_ids</span><span class="p">,</span> <span class="n">catalog</span><span class="o">=</span><span class="s1">&#39;stellar_main&#39;</span><span class="p">,</span> <span class="n">id_col</span><span class="o">=</span><span class="s1">&#39;tic_id&#39;</span><span class="p">)</span>
+
+<span class="go">     asas_sn_id      ra_deg    dec_deg    tic_id</span>
+<span class="go">0  309238124040  329.260377  -8.035864   1021890</span>
+<span class="go">1  335007699083   97.045759  18.214838  46783395</span>
+<span class="go">2  335007693701   81.164422  18.222147   6658326</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These three utilities (cone_search, random_sample, and query_list) allow users to specify catalog and columns of interest    in the parameters.</p>
+<p>This is not the case with the following ADQL utiliy. Rather, ADQL will specify columns and catalogs in the query string.</p>
+</div>
+</section>
+<section id="adql-queries">
+<h2>ADQL Queries<a class="headerlink" href="#adql-queries" title="Permalink to this heading"></a></h2>
+<p>To assist astronomers and data scientists with complex queries, we have included a mechinism that accepts ADQL grammar to query our input tables. In addition to the functionality of traditional ADQL, we have included support for Common Table Expressions, WINDOW functions, correlated subqueries and UNIONS.</p>
+<p>Moreover, we have have also removed geometry functions such as BOX, CIRCLE, AREA, POINT and CONTAINS. Instead we have written a DISTANCE function to accomplish cone searches and find nearest neighbors.</p>
+<p>A simple cone search to would be written as follows.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">query_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="s2">  SELECT</span>
+<span class="gp">... </span><span class="s2">    asas_sn_id, ra_deg, dec_deg</span>
+<span class="gp">... </span><span class="s2">  FROM stellar_main</span>
+<span class="gp">... </span><span class="s2">  WHERE DISTANCE(ra_deg, dec_deg, 270, -88) &lt;= 5.1 &quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">adql_query</span><span class="p">(</span><span class="n">query_str</span><span class="p">)</span>
+<span class="go">          asas_sn_id      ra_deg    dec_deg</span>
+<span class="go">0            1094902   14.059417 -89.846361</span>
+<span class="go">1            1099017  182.038926 -89.804971</span>
+<span class="go">2            1105675  309.260296 -89.743042</span>
+<span class="go">3            1109079   39.243573 -89.709996</span>
+<span class="go">4            1110860  281.009406 -89.701636</span>
+<span class="gp">... </span>             <span class="o">...</span>         <span class="o">...</span>        <span class="o">...</span>
+<span class="go">245123   77310219747  256.853379 -83.001130</span>
+<span class="go">245124   77310248925  260.635568 -82.997364</span>
+<span class="go">245125  266288894288  276.533820 -82.974527</span>
+<span class="go">245126   77310240409  278.626894 -82.946876</span>
+<span class="go">245127   77310268049  263.648603 -82.935546</span>
+
+<span class="go">[245128 rows x 3 columns]</span>
+</pre></div>
+</div>
+<p>We can also write more complex queries. Lets say that we were looking for white dwarfs in the stellar_main catalog that have entries in the AAVSO catalog.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">... </span><span class="s2">SELECT</span>
+<span class="gp">... </span><span class="s2">  asas_sn_id,</span>
+<span class="gp">... </span><span class="s2">  gaia_id,</span>
+<span class="gp">... </span><span class="s2">  pstarrs_g_mag,</span>
+<span class="gp">... </span><span class="s2">  (gaia_mag - (5 * LOG10(plx) - 10)) AS g_mag_abs,</span>
+<span class="gp">... </span><span class="s2">  name</span>
+<span class="gp">... </span><span class="s2">FROM stellar_main</span>
+<span class="gp">... </span><span class="s2">JOIN aavsovsx USING(asas_sn_id)</span>
+<span class="gp">... </span><span class="s2">WHERE 1=1</span>
+<span class="gp">... </span><span class="s2"> AND pstarrs_g_mag &lt; 14</span>
+<span class="gp">... </span><span class="s2"> AND (gaia_mag - (5 * LOG10(plx) - 10)) &gt; 10</span>
+<span class="gp">... </span><span class="s2"> AND (gaia_b_mag - gaia_r_mag) &lt; 1.5</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">adql_query</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+<span class="go">         asas_sn_id              gaia_id  pstarrs_g_mag  g_mag_abs                          name</span>
+<span class="go">0            283310  5784483772687631616         11.838  20.976036  ASASSN-V J132541.88-795516.2</span>
+<span class="go">1            433794  2245186702219362816         13.460  22.189073  ASASSN-V J204415.17+641907.8</span>
+<span class="go">2            570001  2197067464884375040          8.113  14.130535               TYC 4254-2584-1</span>
+<span class="go">3           1350030  2105467632210708096         12.880  20.537968                   KIC 7018521</span>
+<span class="go">4        8590161897  2203889767037608576          4.460  13.575475                       nu. Cep</span>
+<span class="gp">... </span>            <span class="o">...</span>                  <span class="o">...</span>            <span class="o">...</span>        <span class="o">...</span>                           <span class="o">...</span>
+<span class="go">86597  661425116212  5351127310598407680         12.337  23.367740           GDS_J1043139-575342</span>
+<span class="go">86598  661425194521  5816920980613874176         12.403  22.073054  ASASSN-V J170046.29-640051.9</span>
+<span class="go">86599  661425300532  5869798938696312320         12.642  22.770550           GDS_J1324289-593640</span>
+<span class="go">86600  661425432124  5241367772080625280         11.742  24.019660           ASAS J104456-6351.7</span>
+<span class="go">86601  661425530752  6055983193972528128          9.316  21.456082                     HD 113013</span>
+
+<span class="go">[86602 rows x 5 columns]</span>
+</pre></div>
+</div>
+<p>Our full ADQL grammar is available further in the documentation.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="lightcurves.html" class="btn btn-neutral float-right" title="Light Curve Utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Kyle Hart.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

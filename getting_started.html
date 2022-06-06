@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; pyasassn 0.5.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Catalog Query Tools" href="queries.html" />
+    <link rel="prev" title="Welcome to the ASAS-SN Sky Patrol Project!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyasassn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#client">Client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Catalog Query Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightcurves.html">Light Curve Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">Additional Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="website.html">Online GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyasassn.html">Code Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyasassn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
+<p>Before installation, ensure that you have a working Python =&gt; 3.6 environment on your machine.
+Since this module enforces specific versions of pandas, numpy, and pyarrow it would also be wise to create a new conda-env.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>While we are still in beta release, the only option to download the module is directly through github.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">asas</span><span class="o">-</span><span class="n">sn</span><span class="o">/</span><span class="n">skypatrol</span><span class="o">.</span><span class="n">git</span>
+<span class="n">pip3</span> <span class="n">install</span> <span class="n">skypatrol</span><span class="o">/</span>
+</pre></div>
+</div>
+</section>
+<section id="client">
+<h2>Client<a class="headerlink" href="#client" title="Permalink to this heading"></a></h2>
+<p>Once you have received a username and token password you will be able to create a client.
+The client object contains information about all available input catalogs.
+Sky Patrol input catalogs are generated directly from NASA’s HEASARC archive and are searchable by all original columns.
+The stellar_main catalog contains the bulk of our targets (&gt; 98 million) and was built from the ATLAS Refcat2 source list; it is cross-matched with both Gaia DR2 and the TESS Input Catalog (TICv8).
+The master_list catalog gives all the targets for which we have lightcurves. Our targets are cross-matched accross all our input catalogs with <strong>2 arc second cones</strong>.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pyasassn.client</span> <span class="kn">import</span> <span class="n">SkyPatrolClient</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">SkyPatrolClient</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">catalogs</span>
+
+<span class="go">Table Name: stellar_main</span>
+<span class="go">Num Columns: 47</span>
+<span class="go">Num Targets: 98932961</span>
+
+<span class="go">Table Name: master_list</span>
+<span class="go">Num Columns: 4</span>
+<span class="go">Num Targets: 103874668</span>
+
+<span class="go">Table Name: comets</span>
+<span class="go">Num Columns: 1</span>
+<span class="go">Num Targets: 1825</span>
+
+<span class="go">Table Name: swift</span>
+<span class="go">Num Columns: 56</span>
+<span class="go">Num Targets: 254936</span>
+
+<span class="go">Table Name: allwiseagn</span>
+<span class="go">Num Columns: 15</span>
+<span class="go">Num Targets: 1354900</span>
+
+<span class="go">Table Name: mdwarf</span>
+<span class="go">Num Columns: 32</span>
+<span class="go">Num Targets: 8927</span>
+
+<span class="go">Table Name: milliquas</span>
+<span class="go">Num Columns: 21</span>
+<span class="go">Num Targets: 1979676</span>
+
+<span class="gp">...</span>
+</pre></div>
+</div>
+<p>Before you begin queries you can check each input catalog for available columns and data-types.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">catalogs</span><span class="o">.</span><span class="n">master_list</span>
+
+<span class="go">         col_names         dtypes</span>
+<span class="go">0       asas_sn_id         bigint</span>
+<span class="go">1           ra_deg         double</span>
+<span class="go">2          dec_deg         double</span>
+<span class="go">3  catalog_sources  array&lt;string&gt;</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">catalogs</span><span class="o">.</span><span class="n">milliquas</span>
+
+<span class="go">        col_names  dtypes</span>
+<span class="go">0      asas_sn_id  bigint</span>
+<span class="go">1          ra_deg  double</span>
+<span class="go">2         dec_deg  double</span>
+<span class="go">3            name  string</span>
+<span class="go">4             lii  double</span>
+<span class="go">5             bii  double</span>
+<span class="go">6      broad_type  string</span>
+<span class="go">7            rmag  double</span>
+<span class="go">8            bmag  double</span>
+<span class="go">9    optical_flag  string</span>
+<span class="go">10   red_psf_flag  string</span>
+<span class="go">11  blue_psf_flag  string</span>
+<span class="go">12       redshift  double</span>
+<span class="go">13       ref_name  string</span>
+<span class="go">14   ref_redshift  string</span>
+<span class="go">15       qso_prob  double</span>
+<span class="go">16     radio_name  string</span>
+<span class="go">17      xray_name  string</span>
+<span class="go">18     alt_name_1  string</span>
+<span class="go">19     alt_name_2  string</span>
+<span class="go">20          class  bigint</span>
+</pre></div>
+</div>
+<p>Notice that <strong>asas_sn_id</strong> is common to all of our input catalogs. This is the mechanism that allows you to pull lightcurves.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to the ASAS-SN Sky Patrol Project!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="queries.html" class="btn btn-neutral float-right" title="Catalog Query Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Kyle Hart.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

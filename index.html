@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome to the ASAS-SN Sky Patrol Project! &mdash; pyasassn 0.5.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting Started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> pyasassn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Catalog Query Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightcurves.html">Light Curve Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">Additional Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="website.html">Online GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyasassn.html">Code Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">pyasassn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Welcome to the ASAS-SN Sky Patrol Project!</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="welcome-to-the-asas-sn-sky-patrol-project">
+<h1>Welcome to the ASAS-SN Sky Patrol Project!<a class="headerlink" href="#welcome-to-the-asas-sn-sky-patrol-project" title="Permalink to this heading"></a></h1>
+<img alt="_images/asas_sn_logo1.png" src="_images/asas_sn_logo1.png" />
+<p>The All-Sky Automated Survey for Supernovae (ASAS-SN) project has been scanning the night sky for years in search of supernovae and other bright transients. With our worldwide network of robotic 14-cm telescopes we can image the enitre sky nightly down to 18.5 magnitudes (g-band).</p>
+<p>The Sky Patrol initiative aims to provide the community with real-time (as well as historical) photometry data for over 100 million targets accross the sky. After each observation clears our image processing pipeline we run photometry on all present targets as given by our input catalogs. These photometric points are appended to the light curves in our database and immediately available to the public.</p>
+<p>The pyasassn tool gives astronomers and data scientists a streamlined python client to interact with our photometry database’s API. We have included utilities for target lookup, as well as light curve downloads and visualizations.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html#client">Client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Catalog Query Tools</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="queries.html#cone-searches">Cone Searches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="queries.html#random-samples">Random Samples</a></li>
+<li class="toctree-l2"><a class="reference internal" href="queries.html#catalog-id-lookups">Catalog ID Lookups</a></li>
+<li class="toctree-l2"><a class="reference internal" href="queries.html#adql-queries">ADQL Queries</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="lightcurves.html">Light Curve Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="lightcurves.html#downloads">Downloads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lightcurves.html#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lightcurves.html#individual-light-curves">Individual Light Curves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lightcurves.html#periodigram-utility">Periodigram Utility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lightcurves.html#saving-data">Saving Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">Additional Information</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="additional.html#telescope-network">Telescope Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="additional.html#photometry">Photometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="additional.html#adql">ADQL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="additional.html#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="additional.html#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="additional.html#example-queries">Example Queries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="additional.html#cone-search">Cone Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="additional.html#nearest-neighbor-search">Nearest Neighbor Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="additional.html#cross-catalog-search">Cross Catalog Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="additional.html#filter-by-radial-pollution-and-mean-mag">Filter by Radial Pollution and Mean Mag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="additional.html#finding-white-dwarfs">Finding White Dwarfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="additional.html#name-lookups">Name Lookups</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="additional.html#catalog-requests">Catalog Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="additional.html#citation">Citation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="website.html">Online GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyasassn.html">Code Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pyasassn.html#module-pyasassn.client">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyasassn.html#module-pyasassn.utils">Light Curve Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="license.html#gnu-general-public-license">GNU General Public License</a></li>
+<li class="toctree-l2"><a class="reference internal" href="license.html#preamble">Preamble</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Kyle Hart.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

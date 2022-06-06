@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Additional Information &mdash; pyasassn 0.5.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Online GUI" href="website.html" />
+    <link rel="prev" title="Light Curve Utilities" href="lightcurves.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyasassn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Catalog Query Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightcurves.html">Light Curve Utilities</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Additional Information</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#telescope-network">Telescope Network</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#photometry">Photometry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adql">ADQL</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#syntax">Syntax</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example-queries">Example Queries</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cone-search">Cone Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nearest-neighbor-search">Nearest Neighbor Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cross-catalog-search">Cross Catalog Search</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#filter-by-radial-pollution-and-mean-mag">Filter by Radial Pollution and Mean Mag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finding-white-dwarfs">Finding White Dwarfs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#name-lookups">Name Lookups</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#catalog-requests">Catalog Requests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#citation">Citation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="website.html">Online GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyasassn.html">Code Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyasassn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Additional Information</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/additional.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="additional-information">
+<h1>Additional Information<a class="headerlink" href="#additional-information" title="Permalink to this heading"></a></h1>
+<section id="telescope-network">
+<h2>Telescope Network<a class="headerlink" href="#telescope-network" title="Permalink to this heading"></a></h2>
+<p>The ASAS-SN telescope network consists of five stations;  Haleakala Observatory (Hawaii)  Mc-Donald Observatory (Texas),  and the South African Astrophysical Observatory (SAAO, South Africa) each have one station, while Cerro  Tololo  International  Obervatory (CITO,  Chile) has two.</p>
+<img alt="_images/telescope.jpg" src="_images/telescope.jpg" />
+<p>Each station has four units using FLI ProLine Cooled 2k CCD cameras with 14-cm aperture Nikon telephoto lenses. The units’ field-of-view is 4.5 degrees on the side (20 degrees <sup>2</sup>) with a pixel size of 8.0 arcseconds. Ideally, each observation epoch consists of three dithered 90 second exposures, though our we are currently averaging 2.7 exposures per epoch due to scheduling and weather events. Furthermore, our observations are split between those taken with legacy V-band filters and g-band filters which we plan to use in perpetuity. With V-band filters the units are sensitive <em>m</em> ~ 17.5. Using g-band filters the units are sensitive to <em>m</em> ~ 18.5.The original CTIO and Hawaii stations used V-band filters for observations up until spring of 2019, where after they were switched to g-band. The latter three stations have been using g-band filters since their beginning of their operations.</p>
+</section>
+<section id="photometry">
+<h2>Photometry<a class="headerlink" href="#photometry" title="Permalink to this heading"></a></h2>
+<p>To achieve full coverage of the sky the ASAS-SN observations are scheduled on a number of tessellated fields. Each field matches the 20 degree :superscript: <cite>2</cite> camera field-of-view and has at least a 0.5 degree overlap with adjacent fields. We have a total of 2,824 fields and each camera is scheduled to image a select subset of them.</p>
+<p>The data were reduced using a fully-automated pipeline based on the ISIS image subtraction package. Each photometric epoch (usually) combines three dithered 90-second image exposures with a 4.47 x 4.47 degree field-of-view that is subtracted from a reference image.  We then used the IRAF package with a 2-pixel, radius aperture to perform aperture photometry on each subtracted image, generating a differential light curve. The photometry was calibrated using the ATLAS Reference Catalog (REFCAT2).</p>
+<p>To run photometry we have built reference images for all of our camera-fields. The reference images are calibrated using REFCAT2 and by fitting a 2d polynomial to find the zero point. After calibration we preform reference photometry on all targets from our input catalog that fall within each field and we crop out those within 0.2 degrees of the fields’ boundaries. Within an hour of observation our pipeline reduces and co-adds images together into observation epochs. We then perform photometry on each of these co-adds, using the reference photometry to determine magnitude differences. Finally the photometry for each target in a given co-add is appended to the corresponding light curves in our database.</p>
+</section>
+<section id="adql">
+<h2>ADQL<a class="headerlink" href="#adql" title="Permalink to this heading"></a></h2>
+<p>While many other survey utilities such as the Gaia DR2 Archive and VizeR run interfaces compliant with the International Virtual Observatory Alliance’s (IVOA) Astronomical Data Query Language  (ADQL) specification, we have chosen to use a custom grammar that both adds functionality and simplifies geometric queries</p>
+<section id="syntax">
+<h3>Syntax<a class="headerlink" href="#syntax" title="Permalink to this heading"></a></h3>
+<p>Our ADQL syntax is based off ANSI SQL and includes functions useful for astronomical queries.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">adql_statement</span> <span class="p">:</span>
+  <span class="p">[</span><span class="n">with_clause</span><span class="p">]</span> <span class="n">select_statement</span> <span class="p">[</span><span class="n">union_select</span><span class="p">]</span>
+
+<span class="n">select_statement</span><span class="p">:</span>
+    <span class="n">SELECT</span>  <span class="p">[</span> <span class="n">ALL</span> <span class="o">|</span> <span class="n">DISTINCT</span> <span class="p">]</span>
+    <span class="n">select_expression</span> <span class="p">[</span> <span class="n">alias</span> <span class="p">]</span> <span class="p">[</span> <span class="p">,</span> <span class="n">select_expression</span> <span class="p">[</span> <span class="n">alias</span> <span class="p">]</span> <span class="p">]</span> <span class="o">...</span>
+    <span class="n">FROM</span> <span class="n">table_source</span>  <span class="p">[</span> <span class="n">join_clause</span> <span class="p">]</span> <span class="o">...</span>
+    <span class="p">[</span> <span class="n">WINDOW</span> <span class="n">window_name</span> <span class="n">AS</span> <span class="p">(</span> <span class="n">window_spec</span> <span class="p">)</span> <span class="p">[</span> <span class="p">,</span> <span class="n">window_name</span> <span class="n">AS</span> <span class="p">(</span> <span class="n">window_spec</span> <span class="p">)</span> <span class="p">]</span> <span class="o">...</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="n">WHERE</span> <span class="n">condition</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="n">GROUP</span> <span class="n">BY</span> <span class="n">column_name</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="n">HAVING</span> <span class="n">condition</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="n">ORDER</span> <span class="n">BY</span> <span class="p">{</span> <span class="n">column_name</span> <span class="o">|</span> <span class="n">position</span> <span class="p">}</span> <span class="p">[</span> <span class="n">ASC</span> <span class="o">|</span> <span class="n">DESC</span> <span class="p">],</span> <span class="o">...</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="n">LIMIT</span> <span class="n">row_count</span> <span class="p">]</span>
+
+<span class="n">with_clause</span><span class="p">:</span>
+    <span class="n">WITH</span> <span class="n">alias</span> <span class="n">AS</span> <span class="p">(</span> <span class="n">select_statement</span> <span class="p">)</span> <span class="p">[</span> <span class="p">,</span> <span class="n">alias</span> <span class="n">AS</span> <span class="p">(</span> <span class="n">select_statement</span> <span class="p">)</span> <span class="p">]</span> <span class="o">...</span>
+
+<span class="n">union_select</span><span class="p">:</span>
+    <span class="n">UNION</span> <span class="p">[</span> <span class="n">ALL</span> <span class="o">|</span> <span class="n">DISTINCT</span> <span class="p">]</span> <span class="n">select_statement</span>
+    <span class="p">[</span> <span class="n">UNION</span> <span class="p">[</span> <span class="n">ALL</span> <span class="o">|</span> <span class="n">DISTINCT</span> <span class="p">]</span> <span class="n">select_statement</span>  <span class="p">]</span> <span class="o">...</span>
+
+<span class="n">select_expression</span><span class="p">:</span> <span class="p">{</span>
+      <span class="o">*</span>
+    <span class="o">|</span> <span class="n">column_name</span>
+    <span class="o">|</span> <span class="n">expression</span>
+    <span class="o">|</span> <span class="n">function_call</span> <span class="p">[</span> <span class="n">OVER</span> <span class="p">(</span> <span class="p">[</span> <span class="n">window_name</span><span class="o">|</span> <span class="n">window_spec</span> <span class="p">]</span> <span class="p">)</span>
+    <span class="o">|</span> <span class="p">(</span> <span class="n">select_statement</span> <span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">table_source</span><span class="p">:</span> <span class="p">{</span>
+    <span class="n">table_name</span>  <span class="p">[</span> <span class="n">alias</span> <span class="p">]</span>
+  <span class="o">|</span> <span class="p">(</span> <span class="n">select_statement</span> <span class="p">)</span> <span class="p">[</span> <span class="n">alias</span> <span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">join_clause</span> <span class="p">{</span>
+    <span class="n">table_source</span> <span class="n">INNER</span> <span class="n">JOIN</span> <span class="n">table_source</span> <span class="p">[</span> <span class="n">join_spec</span> <span class="p">]</span>
+  <span class="o">|</span> <span class="n">table_source</span> <span class="p">{</span> <span class="n">LEFT</span> <span class="o">|</span> <span class="n">RIGHT</span> <span class="p">}</span> <span class="p">[</span><span class="n">OUTER</span><span class="p">]</span> <span class="n">JOIN</span> <span class="n">table_source</span> <span class="p">[</span> <span class="n">join_spec</span> <span class="p">]</span>
+  <span class="o">|</span> <span class="n">table_source</span> <span class="n">NATURAL</span> <span class="p">[</span> <span class="n">INNER</span> <span class="o">|</span> <span class="p">{</span> <span class="n">LEFT</span> <span class="o">|</span> <span class="n">RIGHT</span> <span class="p">}</span> <span class="p">[</span> <span class="n">OUTER</span> <span class="p">]</span> <span class="p">]</span> <span class="n">JOIN</span> <span class="n">table_source</span>
+<span class="p">}</span>
+
+<span class="n">join_spec</span><span class="p">:</span> <span class="p">{</span>
+    <span class="n">USING</span> <span class="p">(</span><span class="n">column_name</span><span class="p">)</span>
+  <span class="o">|</span> <span class="n">ON</span> <span class="n">condition</span>
+<span class="p">}</span>
+
+<span class="n">window_spec</span><span class="p">:</span>
+    <span class="p">[</span> <span class="n">window_name</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="n">PARTITION</span> <span class="n">BY</span> <span class="n">expression</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="n">ORDER</span> <span class="n">BY</span> <span class="n">column_name</span> <span class="p">{</span> <span class="n">ASC</span> <span class="o">|</span> <span class="n">DESC</span> <span class="p">}</span> <span class="p">]</span>
+    <span class="p">[</span> <span class="p">{</span>
+        <span class="n">CURRENT_ROW</span>
+      <span class="o">|</span> <span class="p">{</span> <span class="n">UNBOUNDED</span> <span class="o">|</span> <span class="n">expression</span> <span class="p">}</span> <span class="p">{</span> <span class="n">PRECEDING</span> <span class="o">|</span> <span class="n">FOLLOWING</span> <span class="p">}</span>
+      <span class="o">|</span> <span class="n">BETWEEN</span> <span class="n">frame_start</span> <span class="n">AND</span> <span class="n">frame_end</span>
+<span class="p">}</span> <span class="p">]</span>
+
+<span class="n">alias</span><span class="p">:</span>
+    <span class="p">[</span> <span class="n">AS</span> <span class="p">]</span> <span class="n">identifier</span>
+</pre></div>
+</div>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this heading"></a></h3>
+<p><strong>DISTANCE</strong> (ra <sub>0</sub>, dec <sub>0</sub>, ra <sub>1</sub>, dec <sub>2</sub>)</p>
+<div class="line-block">
+<div class="line">Input: coordinates in decimal degrees.</div>
+<div class="line">Returns: great circle distance between coordinates in decimal degrees.</div>
+</div>
+<p><strong>ARCMIN</strong> (<em>units</em>)</p>
+<div class="line-block">
+<div class="line">Input: distance in minues of arc.</div>
+<div class="line">Returns: distance in decimal degrees.</div>
+</div>
+<p><strong>ARCSEC</strong> (<em>units</em>)</p>
+<div class="line-block">
+<div class="line">Input: distance in seconds of arc.</div>
+<div class="line">Returns: distance in decimal degrees.</div>
+</div>
+<p><strong>HMS</strong> (<em>coordinates</em>)</p>
+<div class="line-block">
+<div class="line">Input: right ascension in hours/minutes/seconds (e.g., ‘22:02:15.5’).</div>
+<div class="line">Returns: right ascension in decimal degrees.</div>
+</div>
+<p><strong>DMS</strong> (<em>coordinates</em>)</p>
+<div class="line-block">
+<div class="line">Input: declination in degrees/minutes/seconds, (e.g., ‘-61:39:34.6’).</div>
+<div class="line">Returns: declination in decimal degrees.</div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As our catalog search engine is built on Apache Spark, users can employ all of <a class="reference external" href="https://spark.apache.org/docs/latest/api/sql/index.html">Spark’s SQL functions</a>.</p>
+</div>
+</section>
+<section id="example-queries">
+<h3>Example Queries<a class="headerlink" href="#example-queries" title="Permalink to this heading"></a></h3>
+<p>The following examples illustrate different types of queries possible through our ADQL interface.</p>
+<section id="cone-search">
+<h4>Cone Search<a class="headerlink" href="#cone-search" title="Permalink to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span>
+  <span class="n">asas_sn_id</span><span class="p">,</span>
+  <span class="n">ra_deg</span><span class="p">,</span>
+  <span class="n">dec_deg</span>
+<span class="n">FROM</span> <span class="n">stellar_main</span>
+<span class="n">WHERE</span> <span class="n">DISTANCE</span><span class="p">(</span><span class="n">ra_deg</span><span class="p">,</span> <span class="n">dec_deg</span><span class="p">,</span> <span class="mf">255.0</span><span class="p">,</span> <span class="mf">82.1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">5.0</span>
+</pre></div>
+</div>
+<p>Returns all targets in the stellar_main catalog within 5.0 degrees or RA ~ 255.0 DEC ~ 82.1</p>
+</section>
+<section id="nearest-neighbor-search">
+<h4>Nearest Neighbor Search<a class="headerlink" href="#nearest-neighbor-search" title="Permalink to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WITH</span> <span class="n">sources</span> <span class="n">AS</span>
+  <span class="p">(</span>
+    <span class="n">SELECT</span>
+      <span class="n">asas_sn_id</span><span class="p">,</span>
+      <span class="n">ra_deg</span><span class="p">,</span>
+      <span class="n">dec_deg</span><span class="p">,</span>
+      <span class="n">DISTANCE</span><span class="p">(</span><span class="n">ra_deg</span><span class="p">,</span> <span class="n">dec_deg</span><span class="p">,</span> <span class="mf">255.0</span><span class="p">,</span> <span class="mf">82.1</span><span class="p">)</span> <span class="n">AS</span> <span class="n">angular_dist</span>
+    <span class="n">FROM</span> <span class="n">stellar_main</span>
+  <span class="p">)</span>
+<span class="n">SELECT</span> <span class="o">*</span>
+<span class="n">FROM</span> <span class="n">sources</span>
+<span class="n">WHERE</span> <span class="n">angular_dist</span> <span class="o">&lt;=</span> <span class="n">ARCMIN</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+<span class="n">ORDER</span> <span class="n">BY</span> <span class="n">angular_dist</span> <span class="n">ASC</span>
+</pre></div>
+</div>
+<p>Returns all targets within 15 arcminutes of coorddinates, ordered by distance from center.</p>
+</section>
+<section id="cross-catalog-search">
+<h4>Cross Catalog Search<a class="headerlink" href="#cross-catalog-search" title="Permalink to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span>
+  <span class="n">asas_sn_id</span><span class="p">,</span>
+  <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="n">AS</span> <span class="n">swift_id</span><span class="p">,</span>
+  <span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="n">AS</span> <span class="n">vso_id</span>
+<span class="n">FROM</span> <span class="n">swift</span> <span class="n">s</span>
+<span class="n">JOIN</span> <span class="n">aavsovsx</span> <span class="n">v</span> <span class="n">USING</span><span class="p">(</span><span class="n">asas_sn_id</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Returns all targets found in both the Swift and AAVSOVSX catalogs.</p>
+</section>
+<section id="filter-by-radial-pollution-and-mean-mag">
+<h4>Filter by Radial Pollution and Mean Mag<a class="headerlink" href="#filter-by-radial-pollution-and-mean-mag" title="Permalink to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span>
+  <span class="n">asas_sn_id</span><span class="p">,</span>
+  <span class="n">gaia_mag</span><span class="p">,</span>
+  <span class="n">rp_01</span>
+<span class="n">FROM</span> <span class="n">stellar_main</span>
+<span class="n">WHERE</span> <span class="mi">1</span><span class="o">=</span><span class="mi">1</span>
+  <span class="n">AND</span> <span class="n">gaia_mag</span> <span class="n">BETWEEN</span> <span class="mf">17.0</span> <span class="n">AND</span> <span class="mf">18.0</span>
+  <span class="n">AND</span> <span class="n">rp_00_1</span> <span class="o">&gt;</span> <span class="mi">20</span>
+</pre></div>
+</div>
+<p>Returns targets with Gaia G mag between 17.0 and 18.0 whose cumulative flux x0.1 is exceeded in a radius over 20 arcseconds (stellar_main columns are derived from <a class="reference external" href="https://archive.stsci.edu/hlsps/atlas-refcat2/hlsp_atlas-refcat2_atlas_ccd_all_multi_v1_readme.txt">REFCAT2</a>).</p>
+</section>
+<section id="finding-white-dwarfs">
+<h4>Finding White Dwarfs<a class="headerlink" href="#finding-white-dwarfs" title="Permalink to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span>
+  <span class="n">asas_sn_id</span><span class="p">,</span>
+  <span class="n">gaia_id</span><span class="p">,</span>
+  <span class="n">pstarrs_g_mag</span><span class="p">,</span>
+  <span class="p">(</span><span class="n">gaia_mag</span> <span class="o">-</span> <span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">LOG10</span><span class="p">(</span><span class="n">plx</span><span class="p">)</span> <span class="o">-</span> <span class="mi">10</span><span class="p">))</span> <span class="n">AS</span> <span class="n">g_mag_abs</span><span class="p">,</span>
+  <span class="n">name</span>
+<span class="n">FROM</span> <span class="n">stellar_main</span>
+<span class="n">JOIN</span> <span class="n">morx</span> <span class="n">USING</span><span class="p">(</span><span class="n">asas_sn_id</span><span class="p">)</span>
+<span class="n">WHERE</span> <span class="mi">1</span><span class="o">=</span><span class="mi">1</span>
+  <span class="n">AND</span> <span class="p">(</span><span class="n">gaia_mag</span> <span class="o">-</span> <span class="p">(</span><span class="mi">5</span> <span class="o">*</span> <span class="n">LOG10</span><span class="p">(</span><span class="n">plx</span><span class="p">)</span> <span class="o">-</span> <span class="mi">10</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">10</span>
+  <span class="n">AND</span> <span class="p">(</span><span class="n">gaia_b_mag</span> <span class="o">-</span> <span class="n">gaia_r_mag</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1.5</span>
+</pre></div>
+</div>
+<p>Returns all white dwarfs found in the stellar_main and <a class="reference external" href="https://heasarc.gsfc.nasa.gov/w3browse/all/morx.html">MORX</a> catalogs by determining absolute gaia magnitudes.</p>
+</section>
+<section id="name-lookups">
+<h4>Name Lookups<a class="headerlink" href="#name-lookups" title="Permalink to this heading"></a></h4>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">SELECT</span>
+  <span class="n">asas_sn_id</span><span class="p">,</span>
+  <span class="n">name</span>
+<span class="n">FROM</span> <span class="n">aavsovsx</span>
+<span class="n">WHERE</span> <span class="n">name</span> <span class="n">LIKE</span> <span class="s1">&#39;ASASSN%&#39;</span>
+</pre></div>
+</div>
+<p>Returns all variable objects in the <a class="reference external" href="https://heasarc.gsfc.nasa.gov/W3Browse/all/aavsovsx.html">AAVSOVSX</a> catalog discovered by the ASAS-SN survey!</p>
+</section>
+</section>
+</section>
+<section id="catalog-requests">
+<h2>Catalog Requests<a class="headerlink" href="#catalog-requests" title="Permalink to this heading"></a></h2>
+<p>Aside from the main stellar catalog we have derived from REFCAT2, we also run photometry on sources from a number of other external catalogs. These external catalogs are from NASA’s High Energy Astrophysics Science Archive Reseach Center (<a class="reference external" href="https://heasarc.gsfc.nasa.gov/">HEASARC</a>).</p>
+<p>If you or your research group is interested in getting ASAS-SN photometry from an additional HEASARC catalog, or any other catalog sources, please contact us.</p>
+</section>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Permalink to this heading"></a></h2>
+<p>Paper in progress.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lightcurves.html" class="btn btn-neutral float-left" title="Light Curve Utilities" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="website.html" class="btn btn-neutral float-right" title="Online GUI" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Kyle Hart.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Code Reference &mdash; pyasassn 0.5.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="Online GUI" href="website.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyasassn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Catalog Query Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lightcurves.html">Light Curve Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">Additional Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="website.html">Online GUI</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Code Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyasassn.client">Client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pyasassn.utils">Light Curve Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyasassn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Code Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pyasassn.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="code-reference">
+<h1>Code Reference<a class="headerlink" href="#code-reference" title="Permalink to this heading"></a></h1>
+<section id="module-pyasassn.client">
+<span id="client"></span><h2>Client<a class="headerlink" href="#module-pyasassn.client" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyasassn.client.SkyPatrolClient">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyasassn.client.</span></span><span class="sig-name descname"><span class="pre">SkyPatrolClient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.SkyPatrolClient" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<blockquote>
+<div><p>The SkyPatrolClient allows users to interact with the ASAS-SN Sky Patrol photometry database.</p>
+</div></blockquote>
+<p>This client enables users to use ADQL, cone searches, random samples, and catalog ID lookups on the input catalogs.</p>
+<p>Queries to the input catalogs will either be returned as pandas DataFrames containing aggregate information
+on astronomical targets, or they will be returned as LightCurveCollections containing photometry data from all
+queried targets.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyasassn.client.SkyPatrolClient.InputCatalogs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">InputCatalogs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">counts</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.SkyPatrolClient.InputCatalogs" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Data structure for holding metadata on ASAS-SN Sky Patrol’s input catalogs.</p>
+<p>Stores input catalog names as well as their searchable columns and total number of targets.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.client.SkyPatrolClient.InputCatalogs.catalog_names">
+<span class="sig-name descname"><span class="pre">catalog_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.SkyPatrolClient.InputCatalogs.catalog_names" title="Permalink to this definition"></a></dt>
+<dd><p>Get all the names of our available input catalogs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>names of all input catalogs (list)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.client.SkyPatrolClient.adql_query">
+<span class="sig-name descname"><span class="pre">adql_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.SkyPatrolClient.adql_query" title="Permalink to this definition"></a></dt>
+<dd><p>Query the ASAS-SN Sky Patrol Input Catalogs with an ADQL string.
+See README.md for more on accepted ADQL context and functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query_str</strong> – ADQL query string</p></li>
+<li><p><strong>download</strong> – return full light curves if True, return catalog information if False</p></li>
+<li><p><strong>save_dir</strong> – if set, then light curves will write to file as they are downloaded</p></li>
+<li><p><strong>file_format</strong> – format to save light curves [‘parquet’, ‘pickle’, ‘csv’]</p></li>
+<li><p><strong>threads</strong> – number of real threads to use for pulling light curves from server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>if ‘download’ if False; pandas Dataframe containing catalog information of targets;
+else LightCurveCollection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.client.SkyPatrolClient.cone_search">
+<span class="sig-name descname"><span class="pre">cone_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ra_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dec_deg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'deg'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'master_list'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.SkyPatrolClient.cone_search" title="Permalink to this definition"></a></dt>
+<dd><p>Query the ASAS-SN Sky Patrol Input Catalogs for all targets within a cone of the sky.
+Does NOT return solar system targets (i.e. asteroids and coma).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ra_deg</strong> – right ascension of cone.
+accepts degree-decimal (float) or HH:MM:SS(.SS) sexagesimal (string)</p></li>
+<li><p><strong>dec_deg</strong> – declination of cone.
+accepts degree/decimal as float or DD:MM:SS(.SS) sexagesimal (string)</p></li>
+<li><p><strong>radius</strong> – radius in degrees of cone, float</p></li>
+<li><p><strong>units</strong> – units for cone radius.
+‘deg’: degree decimal
+‘arcmin’: arcminutes
+‘arcsec’ arcseconds</p></li>
+<li><p><strong>catalog</strong> – which catalog are we searching</p></li>
+<li><p><strong>cols</strong> – columns to return from the given input catalog;
+if None default = [‘asas_sn_id’, ‘ra_deg’, ‘dec_deg’]</p></li>
+<li><p><strong>download</strong> – return full light curves if True, return catalog information if False</p></li>
+<li><p><strong>save_dir</strong> – if set, then light curves will write to file as they are downloaded</p></li>
+<li><p><strong>file_format</strong> – format to save light curves [‘parquet’, ‘pickle’, ‘csv’]</p></li>
+<li><p><strong>threads</strong> – number of real threads to use for pulling light curves from server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>if ‘download’ if False; pandas Dataframe containing catalog information of targets;
+else LightCurveCollection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.client.SkyPatrolClient.query_list">
+<span class="sig-name descname"><span class="pre">query_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'asas_sn_id'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'master_list'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.SkyPatrolClient.query_list" title="Permalink to this definition"></a></dt>
+<dd><p>Query the ASAS-SN Sky Patrol Input Catalogs for all targets with the given identifiers.
+to view the available list of catalogs and identifiers see SkyPatrolClient.catalogs.</p>
+<p>Most of our astronomical targets are in the stellar_main catalog, which has been pre-crossmatched to GaiaDR2,
+ATLAS Refcat2, SDSS, AllWISE, and Tess Input Catalog (TIC v8).</p>
+<p>Thus searching for light curves with a list of Gaia IDs would require catalog=’stellar_main’, id_col=’gaia_id’.
+Our other input catalogs should be searched with id_col=’name’, or by columns giving alternative ids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_ids</strong> – list of target ids for query; list</p></li>
+<li><p><strong>id_col</strong> – the column on the given catalog to search against; string</p></li>
+<li><p><strong>catalog</strong> – which catalog are we searching</p></li>
+<li><p><strong>cols</strong> – columns to return from the given input catalog;
+if None default = [‘asas_sn_id’, ‘ra_deg’, ‘dec_deg’]</p></li>
+<li><p><strong>download</strong> – return full light curves if True, return catalog information if False</p></li>
+<li><p><strong>save_dir</strong> – if set, then light curves will write to file as they are downloaded</p></li>
+<li><p><strong>file_format</strong> – format to save light curves [‘parquet’, ‘pickle’, ‘csv’]</p></li>
+<li><p><strong>threads</strong> – number of real threads to use for pulling light curves from server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>if ‘download’ if False; pandas Dataframe containing catalog information of targets;
+else LightCurveCollection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.client.SkyPatrolClient.random_sample">
+<span class="sig-name descname"><span class="pre">random_sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'master_list'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.SkyPatrolClient.random_sample" title="Permalink to this definition"></a></dt>
+<dd><p>Get n random targets from the ASAS-SN Sky Patrol Input Catalogs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – number of targets to randomly sample</p></li>
+<li><p><strong>catalog</strong> – which catalog are we searching</p></li>
+<li><p><strong>cols</strong> – columns to return from the given input catalog;
+if None default = [‘asas_sn_id’, ‘ra_deg’, ‘dec_deg’]</p></li>
+<li><p><strong>download</strong> – return full light curves if True, return catalog information if False</p></li>
+<li><p><strong>save_dir</strong> – if set, then light curves will write to file as they are downloaded</p></li>
+<li><p><strong>file_format</strong> – format to save light curves [‘parquet’, ‘pickle’, ‘csv’]</p></li>
+<li><p><strong>threads</strong> – number of real threads to use for pulling light curves from server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>if ‘download’ if False; pandas Dataframe containing catalog information of targets;
+else LightCurveCollection</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyasassn.client.load_collection">
+<span class="sig-prename descclassname"><span class="pre">pyasassn.client.</span></span><span class="sig-name descname"><span class="pre">load_collection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.client.load_collection" title="Permalink to this definition"></a></dt>
+<dd><p>Loads a LightCurveCollection from directory.
+Requires an index and light curve files saved from previous collection
+:param save_dir: path where collection is saved
+:param file_format: format of saved light curves
+:return: LightCurveCollection</p>
+</dd></dl>
+
+</section>
+<section id="module-pyasassn.utils">
+<span id="light-curve-tools"></span><h2>Light Curve Tools<a class="headerlink" href="#module-pyasassn.utils" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurve">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyasassn.utils.</span></span><span class="sig-name descname"><span class="pre">LightCurve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pandas_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object for analysing and visualizing ASAS-SN Sky Patrol light curves.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurve.find_period">
+<span class="sig-name descname"><span class="pre">find_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.find_period" title="Permalink to this definition"></a></dt>
+<dd><p>Find the period of the light curve given the power spectrum produced by lomb_scargle.
+Also produces a phase-folded plot of the light curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frequency</strong> – frequency from lomb_scargle()</p></li>
+<li><p><strong>power</strong> – power from lomb_scargle()</p></li>
+<li><p><strong>best_frequency</strong> – peak frequency for phase folding the light curve</p></li>
+<li><p><strong>plot</strong> – if True, then the function also produces a plot of the phase-folded light curve</p></li>
+<li><p><strong>figsize</strong> – size of the plot</p></li>
+<li><p><strong>savefile</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
+<li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
+<li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>period of the light curve</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurve.lomb_scargle">
+<span class="sig-name descname"><span class="pre">lomb_scargle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nterms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'standard'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_per_peak</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nyquist_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.lomb_scargle" title="Permalink to this definition"></a></dt>
+<dd><p>Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
+light curve. Default values work for most variable sources.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fit_mean</strong> – if True, include a constant offset as part of the model at each frequency. This can lead to more accurate results, especially in the case of incomplete phase coverage.</p></li>
+<li><p><strong>center_data</strong> – if True, pre-center the data by subtracting the weighted mean of the input data. This is especially important if fit_mean = False</p></li>
+<li><p><strong>nterms</strong> – number of terms to use in the Fourier fit</p></li>
+<li><p><strong>normalization</strong> – Normalization to use for the periodogram.</p></li>
+<li><p><strong>minimum_frequency</strong> – If specified, then use this minimum frequency rather than one chosen based on the size of the baseline.</p></li>
+<li><p><strong>maximum_frequency</strong> – If specified, then use this maximum frequency rather than one chosen based on the average nyquist frequency.</p></li>
+<li><p><strong>method</strong> – <p>specify the lomb scargle implementation to use. Options are:</p>
+<ul>
+<li><p>‘auto’: choose the best method based on the input</p></li>
+<li><p>‘fast’: use the O[N log N] fast method. Note that this requires evenly-spaced frequencies: by default this will be checked unless assume_regular_frequency is set to True.</p></li>
+<li><p>‘slow’: use the O[N^2] pure-python implementation</p></li>
+<li><p>‘cython’: use the O[N^2] cython implementation. This is slightly faster than method=’slow’, but much more memory efficient.</p></li>
+<li><p>‘chi2’: use the O[N^2] chi2/linear-fitting implementation</p></li>
+<li><p>‘fastchi2’: use the O[N log N] chi2 implementation. Note that this requires evenly-spaced frequencies: by default this will be checked unless assume_regular_frequency is set to True.</p></li>
+<li><p>‘scipy’: use scipy.signal.lombscargle, which is an O[N^2] implementation written in C. Note that this does not support heteroskedastic errors.</p></li>
+</ul>
+</p></li>
+<li><p><strong>samples_per_peak</strong> – The approximate number of desired samples across the typical peak</p></li>
+<li><p><strong>nyquist_factor</strong> – The multiple of the average nyquist frequency used to choose the maximum frequency if maximum_frequency is not provided.</p></li>
+<li><p><strong>plot</strong> – if True, then the function also produces a plot of the power spectrum.</p></li>
+<li><p><strong>figsize</strong> – size of the plot.</p></li>
+<li><p><strong>savefile</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
+<li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
+<li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>power, frequency and the astropy LombScargle object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurve.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.plot" title="Permalink to this definition"></a></dt>
+<dd><p>Plots the given light curve with error bars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figsize</strong> – size of the plot</p></li>
+<li><p><strong>savefile</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
+<li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurve.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.save" title="Permalink to this definition"></a></dt>
+<dd><p>Save the light curve to csv.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> – filename to save this light curve.</p></li>
+<li><p><strong>file_format</strong> – file format of saved objects [‘parquet’, ‘csv’, ‘pickle’]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>void</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pyasassn.utils.</span></span><span class="sig-name descname"><span class="pre">LightCurveCollection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_col</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Object for storing and analysing ASAS-SN Sky Patrol light curves.
+Returned by any SkyPatrolClient query where download=True</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection.apply_function">
+<span class="sig-name descname"><span class="pre">apply_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.apply_function" title="Permalink to this definition"></a></dt>
+<dd><p>Apply a custom aggregate function to all light curves in the collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – custom aggregate function</p></li>
+<li><p><strong>col</strong> – column to apply aggregate function; defaluts to ‘mag’</p></li>
+<li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+<p>:param include_poor_images whether or not to include images of poor or unknown quality; defaults to False
+:return: pandas Dataframe with results</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection.itercurves">
+<span class="sig-name descname"><span class="pre">itercurves</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.itercurves" title="Permalink to this definition"></a></dt>
+<dd><p>Generator to iterate through all light curves in the collection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a generator that iterates over the collection</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">save_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.save" title="Permalink to this definition"></a></dt>
+<dd><p>Saves entire light curve collection to a given directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>save_dir</strong> – directory name</p></li>
+<li><p><strong>file_format</strong> – file format of saved objects [‘parquet’, ‘csv’, ‘pickle’]</p></li>
+<li><p><strong>include_index</strong> – whether or not to save index (catalog_info)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>filenames</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection.stats">
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.stats" title="Permalink to this definition"></a></dt>
+<dd><p>Calculate simple aggregate statistics on the collection.
+Gets the mean and stddev magnitude for each curve as well as the total number of epochs observed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
+<li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>pandas Dataframe with results</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="website.html" class="btn btn-neutral float-left" title="Online GUI" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Kyle Hart.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

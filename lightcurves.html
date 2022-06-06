@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Light Curve Utilities &mdash; pyasassn 0.5.1 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Additional Information" href="additional.html" />
+    <link rel="prev" title="Catalog Query Tools" href="queries.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> pyasassn
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queries.html">Catalog Query Tools</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Light Curve Utilities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#downloads">Downloads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#statistics">Statistics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#individual-light-curves">Individual Light Curves</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#periodigram-utility">Periodigram Utility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#saving-data">Saving Data</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="additional.html">Additional Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="website.html">Online GUI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pyasassn.html">Code Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyasassn</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Light Curve Utilities</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/lightcurves.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="light-curve-utilities">
+<h1>Light Curve Utilities<a class="headerlink" href="#light-curve-utilities" title="Permalink to this heading"></a></h1>
+<section id="downloads">
+<h2>Downloads<a class="headerlink" href="#downloads" title="Permalink to this heading"></a></h2>
+<p>Once you have found found of set of targets through any of the 4 catalog query functions, you can now download their light curves. The <strong>cone_search</strong>, <strong>random_sample</strong>, <strong>query_list</strong>, and <strong>adql_query</strong> functions all have a boolean <strong>download</strong> parameter. If set, then the query function will return a LightCurveCollection object.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lcs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;aavsovsx&#39;</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcs</span>
+<span class="go">&lt;pyasassn.utils.LightCurveCollection object at 0x7f407d458ac8&gt;</span>
+</pre></div>
+</div>
+<p>In the event that we need to download thousands of curves, we could also set the number of worker threads on any of the query functions.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="go"># Two degree cone search near the south pole returns about 38k lightcurves</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">cone_search</span><span class="p">(</span><span class="s1">&#39;18:54:11.5&#39;</span><span class="p">,</span> <span class="s1">&#39;-88:02:55.22&#39;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="go">&lt;pyasassn.utils.LightCurveCollection object at 0x7f403d319550&gt;</span>
+</pre></div>
+</div>
+<p>Since some of our users may want to work with more light curves than can fit into memory, we have included a utility to write straight to disk during download.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="mi">100000</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">threads</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;tmp&#39;</span><span class="p">,</span> <span class="n">file_format</span><span class="o">=</span><span class="s1">&#39;csv&#39;</span><span class="p">)</span>
+<span class="go">[&#39;tmp/292058613402.csv&#39;, &#39;tmp/292058614306.csv&#39;, &#39;tmp/292058615974.csv&#39; ...  &#39;tmp/292058617076.csv&#39;, &#39;tmp/292058618092.csv&#39;, &#39;tmp/292058618311.csv&#39;]</span>
+</pre></div>
+</div>
+</section>
+<section id="statistics">
+<h2>Statistics<a class="headerlink" href="#statistics" title="Permalink to this heading"></a></h2>
+<p>With a LightCurveCollection object we can examine basic statistics on the collection.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lcs</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">random_sample</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;aavsovsx&#39;</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcs</span><span class="o">.</span><span class="n">stats</span><span class="p">()</span>
+<span class="go">               mean_mag   std_mag  epochs</span>
+<span class="go">asas_sn_id</span>
+<span class="go">217136        14.535407  0.399671     383</span>
+<span class="go">226853        11.897238  0.059550     689</span>
+<span class="go">229541        15.801656  0.247964     707</span>
+<span class="go">236976        14.940014  0.095985     493</span>
+<span class="go">243615        14.519483  0.142226     454</span>
+<span class="gp">... </span>                <span class="o">...</span>       <span class="o">...</span>     <span class="o">...</span>
+<span class="go">661427540195  14.530033  0.246480     394</span>
+<span class="go">661427541811  14.920269  0.126683     228</span>
+<span class="go">661427541812  16.151710  0.127563     795</span>
+<span class="go">661427543073  16.404284  0.569805     779</span>
+<span class="go">661427547161  13.821834  0.042326     798</span>
+
+<span class="go">[100 rows x 3 columns]</span>
+</pre></div>
+</div>
+<p>We can also apply our own statistical functions</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lcs</span><span class="o">.</span><span class="n">apply_function</span><span class="p">(</span><span class="n">kurtosis</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="s1">&#39;mag&#39;</span><span class="p">)</span>
+<span class="go">                   mag</span>
+<span class="go">asas_sn_id</span>
+<span class="go">217136       -0.508458</span>
+<span class="go">226853       -0.443827</span>
+<span class="go">229541       -0.080390</span>
+<span class="go">236976        7.166913</span>
+<span class="go">243615       -1.132973</span>
+<span class="gp">... </span>               <span class="o">...</span>
+<span class="go">661427540195 -0.644524</span>
+<span class="go">661427541811  0.640281</span>
+<span class="go">661427541812  2.775451</span>
+<span class="go">661427543073  3.640152</span>
+<span class="go">661427547161  0.256836</span>
+
+<span class="go">[100 rows x 1 columns]</span>
+</pre></div>
+</div>
+</section>
+<section id="individual-light-curves">
+<h2>Individual Light Curves<a class="headerlink" href="#individual-light-curves" title="Permalink to this heading"></a></h2>
+<p>We can retreive individual light curves from the collection with their <strong>asas_sn_id</strong>.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lightcurve</span> <span class="o">=</span> <span class="n">lcs</span><span class="p">[</span><span class="mi">229541</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lightcurve</span>
+<span class="go">&lt;pyasassn.utils.LightCurve object at 0x7f407fe25c18&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lightcurve</span><span class="o">.</span><span class="n">meta</span>
+<span class="go">    asas_sn_id     ra_deg   dec_deg                          name</span>
+<span class="go">18      229541  122.54987 -80.11104  ASASSN-V J081011.92-800639.7</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lightcurve</span><span class="o">.</span><span class="n">data</span>
+<span class="go">      asas_sn_id            jd      flux  flux_err        mag   mag_err      limit  fwhm  image_id camera quality</span>
+<span class="go">0         229541  2.458512e+06  1.723106  0.037263  15.809285  0.023506  18.224440  1.44  bG038905     bG       G</span>
+<span class="go">1         229541  2.459338e+06  2.081630  0.044157  15.604057  0.023057  18.040153  1.72  bo299893     bo       B</span>
+<span class="go">2         229541  2.458904e+06  1.619896  0.054818  15.876348  0.036783  17.805328  1.65  bj310766     bj       G</span>
+<span class="go">3         229541  2.459199e+06  1.726104  0.044310  15.807398  0.027903  18.036377  1.42  bG187463     bG       G</span>
+<span class="go">4         229541  2.458869e+06  2.333322  0.168003  15.480129  0.078263  16.589345  1.52  bj300680     bj       G</span>
+<span class="gp">... </span>         <span class="o">...</span>           <span class="o">...</span>       <span class="o">...</span>       <span class="o">...</span>        <span class="o">...</span>       <span class="o">...</span>        <span class="o">...</span>   <span class="o">...</span>       <span class="o">...</span>    <span class="o">...</span>     <span class="o">...</span>
+<span class="go">1154      229541  2.459684e+06  1.157935  0.085080  16.240855  0.079865  17.328068  1.49  bk500473     bk       G</span>
+<span class="go">1155      229541  2.459686e+06  1.951631  0.167116  15.674071  0.093075  16.595096  1.66  bk501639     bk       G</span>
+<span class="go">1156      229541  2.459299e+06  1.633899  0.117696  15.867003  0.078297  16.975740  1.48  bo288425     bo       G</span>
+<span class="go">1157      229541  2.458463e+06  2.022952  0.033825  15.635101  0.018174  18.329554  1.44  bo094787     bo       G</span>
+<span class="go">1158      229541  2.459689e+06  1.436763  0.086066  16.006603  0.065111  17.315564  1.41  bG342799     bG       G</span>
+
+<span class="go">[1159 rows x 11 columns]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All mag_err values greater than 99 represent non-detection events.</p>
+</div>
+<p>We can also plot the light curve.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">lightcurve</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="_images/lc_plot.png" src="_images/lc_plot.png" />
+</section>
+<section id="periodigram-utility">
+<h2>Periodigram Utility<a class="headerlink" href="#periodigram-utility" title="Permalink to this heading"></a></h2>
+<p>We have included a thin-wrapper for astropy’s lomb scargle periodagram utility. Using the <strong>lomb_scargle</strong> function we can get the freqency and power spectrum of the light curve. While ‘plot’ is set to True, the function will also produce a plot of the power spectrum</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="go"># An astropy LombScargle object is also returned as ls</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frequency</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">ls</span> <span class="o">=</span> <span class="n">lightcurve</span><span class="o">.</span><span class="n">lomb_scargle</span><span class="p">(</span><span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/periodagram.png" src="_images/periodagram.png" />
+<p>Finally, we can use the power spectrum to find the period of our target and generate a phase folded lightcurve.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="go"># If plot is set we will also get a plot.</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lightcurve</span><span class="o">.</span><span class="n">find_period</span><span class="p">(</span><span class="n">frequency</span><span class="p">,</span> <span class="n">power</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">0.13159321928748946</span>
+</pre></div>
+</div>
+<img alt="_images/phase_folded_lc.png" src="_images/phase_folded_lc.png" />
+</section>
+<section id="saving-data">
+<h2>Saving Data<a class="headerlink" href="#saving-data" title="Permalink to this heading"></a></h2>
+<p>Both the individual light curves and the LightCurveCollection objects provide utilities to save to disk. Files will be saved as .csv with meta included for each curve. When a collection is saved an ‘index.csv’ file will be co-located showing the targets’ original queried catalog data.</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="go"># Individual</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lightcurve</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;asassn_lc.csv&#39;</span><span class="p">)</span>
+<span class="go"># Collection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lcs</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">save_dir</span><span class="o">=</span><span class="s1">&#39;tmp/&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="queries.html" class="btn btn-neutral float-left" title="Catalog Query Tools" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="additional.html" class="btn btn-neutral float-right" title="Additional Information" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Kyle Hart.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
