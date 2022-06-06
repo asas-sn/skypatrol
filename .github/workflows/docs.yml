@@ -12,25 +12,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.7
+    - name: Set up Python
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
 
-      - name: Install dependencies
-        run: |
-          sudo apt install pandoc
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install sphinx nbsphinx sphinx_rtd_theme pygments ipython
+    - name: Install dependencies
+      run: |
+        sudo apt install pandoc
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install sphinx nbsphinx sphinx_rtd_theme pygments ipython
 
-      # BUILD DOCS
-      - name: Build
-        run: |
-          make html --directory docs/
+    # BUILD DOCS
+    - name: Build
+      run: |
+        make html --directory docs/
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.3.3
-        with:
-          branch: gh-pages # The branch the action should deploy to.
-          FOLDER: docs/_build/html # The folder the action should deploy.
+    - name: Deploy 🚀
+      uses: JamesIves/github-pages-deploy-action@v4.3.3
+      with:
+        branch: gh-pages # The branch the action should deploy to.
+        FOLDER: docs/_build/html # The folder the action should deploy.
