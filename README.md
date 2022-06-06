@@ -22,11 +22,17 @@ The pyasassn client allows users to query the ASAS-SN input catalog and retrieve
 
 ### Installation
 
-Make sure your pip points to the appropriate Python >= 3.6 installation...
-<pre><code>
-    git clone https://github.com/asas-sn/skypatrol.git
-    pip3 install skypatrol/
-</code></pre>
+The easiest way to get started is with pip:
+
+```bash
+python -m pip install skypatrol
+```
+
+To build from source:
+```bash
+git clone https://github.com/asas-sn/skypatrol.git
+pip3 install skypatrol/
+```
 
 ### Tutorial
 
