@@ -9,14 +9,14 @@
   <a href="https://github.com/asas-sn/skypatrol/actions/workflows/tests.yml">
     <img src="https://github.com/asas-sn/skypatrol/actions/workflows/tests.yml/badge.svg" alt="Tests">
   </a>
-  <a href="http://asas-sn.ifa.hawaii.edu/documentation/index.html">
+  <a href="https://asas-sn.github.io/skypatrol/index.html">
     <img src="https://github.com/asas-sn/skypatrol/actions/workflows/docs.yml/badge.svg" alt="Docs">
   </a>
 </p>
 
 # ASAS-SN SkyPatrol client
 
-The pyasassn client allows users to query the ASAS-SN input catalog and retrieve light curves from our database. These light curves are subject to live updates as we are running continuous photometry on our nightly images.
+The pyasassn client allows users to query the ASAS-SN input catalog and retrieve light curves from our database. These light curves are subject to live updates as we are running continuous photometry on our nightly images. Read the docs [here](https://asas-sn.github.io/skypatrol/index.html)
 
 
 
