@@ -16,13 +16,11 @@
 
 # ASAS-SN SkyPatrol client
 
-The pyasassn client allows users to query the ASAS-SN input catalog and retrieve light curves from our database. These light curves are subject to live updates as we are running continuous photometry on our nightly images. Read the docs [here](https://asas-sn.github.io/skypatrol/index.html)
-
-
+The SkyPatrol pyasassn client allows users to query the [ASAS-SN input catalog](https://asas-sn.osu.edu/) and retrieve light curves from our [photometry database](https://asas-sn.osu.edu/photometry). These light curves are regularly updated with continuous photometry run on nightly images. Read the docs [here](https://asas-sn.github.io/skypatrol/index.html).
 
 ### Installation
 
-The easiest way to get started is with pip:
+The easiest way to get started is with pip, using Python 3.6+:
 
 ```bash
 python -m pip install skypatrol
@@ -34,10 +32,9 @@ git clone https://github.com/asas-sn/skypatrol.git
 pip3 install skypatrol/
 ```
 
-### Tutorial
+### Getting started
 
-Create a SkyPatrolClient object. The client will automatically ping the server for the most recent catalog data.
-
+The SkyPatrolClient will automatically ping the server for the most recent catalog data, allowing us to query through different methods.
 
 ```python
 from pyasassn.client import SkyPatrolClient
@@ -45,11 +42,6 @@ from pyasassn.client import SkyPatrolClient
 client = SkyPatrolClient()
 client.catalogs
 ```
-
-
-
-
-    
     Table Name: stellar_main
     Num Columns: 47
     

@@ -22,7 +22,7 @@ setup(
     name="skypatrol",
     version="0.6.4",
     url="https://github.com/asas_sn/skypatrol/",
-    author="Kyle Hart",
+    author="ASAS-SN",
     author_email="kylehart@hawaii.edu",
     license="GPL v.3",
     packages=["pyasassn"],
