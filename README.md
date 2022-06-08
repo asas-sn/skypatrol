@@ -16,7 +16,7 @@
 
 # ASAS-SN SkyPatrol client
 
-The SkyPatrol pyasassn client allows users to query the [ASAS-SN input catalog](https://asas-sn.osu.edu/) and retrieve light curves from our [photometry database](https://asas-sn.osu.edu/photometry). These light curves are regularly updated with continuous photometry run on nightly images. Read the docs [here](https://asas-sn.github.io/skypatrol/index.html).
+The SkyPatrol pyasassn client allows users to query the ASAS-SN input catalog and retrieve light curves from our photometry database. These light curves are regularly updated with continuous photometry run on nightly images. Read the docs [here](https://asas-sn.github.io/skypatrol/index.html).
 
 ### Installation
 
