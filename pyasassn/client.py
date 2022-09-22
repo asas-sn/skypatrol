@@ -1,5 +1,4 @@
 from __future__ import division, print_function
-
 from base64 import encodebytes
 from glob import glob
 import requests
@@ -32,6 +31,11 @@ class SkyPatrolClient:
         self.index = None
         self.verbose = verbose
         try:
+            url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_current_message"
+            url_data = requests.get(url).content
+            self.message = url_data.decode()
+            self._verbose_print(self.message)
+
             url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_schema"
             url_data = requests.get(url).content
             schema = json.loads(url_data)
@@ -39,6 +43,10 @@ class SkyPatrolClient:
             url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_counts"
             url_data = requests.get(url).content
             counts = json.loads(url_data)
+
+            url = "http://asassn-lb01.ifa.hawaii.edu:9006/get_block_servers"
+            url_data = requests.get(url).content
+            self.block_servers = json.loads(url_data)
 
             self.catalogs = SkyPatrolClient.InputCatalogs(schema, counts)
 
@@ -79,7 +87,7 @@ class SkyPatrolClient:
         self._validate_response(response)
 
         # Deserialize from arrow
-        tar_df = _deserialize(response)
+        tar_df = _deserialize(response.content)
         self.index = tar_df
 
         if download is False:
@@ -173,7 +181,7 @@ class SkyPatrolClient:
         self._validate_response(response)
 
         # Deserialize from arrow
-        tar_df = _deserialize(response)
+        tar_df = _deserialize(response.content)
         self.index = tar_df
 
         if download is False:
@@ -281,7 +289,7 @@ class SkyPatrolClient:
         self._validate_response(response)
 
         # Deserialize from arrow
-        tar_df = _deserialize(response)
+        tar_df = _deserialize(response.content)
         self.index = tar_df
 
         if download is False:
@@ -374,7 +382,7 @@ class SkyPatrolClient:
         self._validate_response(response)
 
         # Deserialize from arrow
-        tar_df = _deserialize(response)
+        tar_df = _deserialize(response.content)
         self.index = tar_df
 
         if download is False:
@@ -436,12 +444,11 @@ class SkyPatrolClient:
         self, query_hash, block_idx, catalog, save_dir, file_format
     ):
         # Query API with (POST METHOD)
-        server = (block_idx % 3) + 1
         url = (
-            f"http://asassn-data{server:02d}.ifa.hawaii.edu:9006/get_block/"
+            f"http://{self.block_servers[block_idx % len(self.block_servers)]}:9006/get_block/"
             f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
         )
-        response = requests.get(url)
+        response = requests.get(url).content
 
         # Pandas dataframe
         data = _deserialize(response)
@@ -531,7 +538,7 @@ def _deserialize(response):
     # Deserialize from arrow
     with warnings.catch_warnings():
         warnings.simplefilter(action="ignore", category=FutureWarning)
-        buff = pa.py_buffer(response.content)
+        buff = pa.py_buffer(response)
         return pa.deserialize(buff)
 
 
