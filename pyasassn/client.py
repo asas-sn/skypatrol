@@ -152,10 +152,12 @@ class SkyPatrolClient:
             raise ValueError("invalid catalog")
         if cols is None:
             cols = ["asas_sn_id", "ra_deg", "dec_deg"]
-            if catalog not in ["stellar_main", "master_list"]:
-                cols.append("name")
+            if catalog == "m_giants":
+                cols.append("gaia_id")
             elif catalog == "master_list":
                 cols.append("catalog_sources")
+            elif catalog not in ["stellar_main", "master_list"]:
+                cols.append("name")
         if set(cols).issubset(set(self.catalogs[catalog]["col_names"])) is False:
             raise ValueError(
                 "one or more of the listed cols is not a column name in the selected catalog"
@@ -254,10 +256,12 @@ class SkyPatrolClient:
         # Set default columns
         if cols is None and catalog not in ["asteroids", "comets"]:
             cols = ["asas_sn_id", "ra_deg", "dec_deg"]
-            if catalog not in ["stellar_main", "master_list"]:
-                cols.append("name")
+            if catalog == "m_giants":
+                cols.append("gaia_id")
             elif catalog == "master_list":
                 cols.append("catalog_sources")
+            elif catalog not in ["stellar_main", "master_list"]:
+                cols.append("name")
         if cols is None and catalog in ["asteroids", "comets"]:
             cols = ["name"]
         # Ensure valid columns
@@ -350,10 +354,12 @@ class SkyPatrolClient:
         # Set default columns
         if cols is None and catalog not in ["asteroids", "comets"]:
             cols = ["asas_sn_id", "ra_deg", "dec_deg"]
-            if catalog not in ["stellar_main", "master_list"]:
-                cols.append("name")
+            if catalog == "m_giants":
+                cols.append("gaia_id")
             elif catalog == "master_list":
                 cols.append("catalog_sources")
+            elif catalog not in ["stellar_main", "master_list"]:
+                cols.append("name")
         if cols is None and catalog in ["asteroids", "comets"]:
             cols = ["name"]
         # Ensure valid columns
