@@ -449,17 +449,44 @@ class SkyPatrolClient:
     def _get_lightcurve_chunk(
         self, query_hash, block_idx, catalog, save_dir, file_format
     ):
-        # Query API with (POST METHOD)
-        url = (
-            f"http://{self.block_servers[block_idx % len(self.block_servers)]}:9006/get_block/"
-            f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
-        )
-        response = requests.get(url).content
+        # Avalable servers
+        n_servers = len(self.block_servers)
+        # Start timeout at 0
+        timeout = 1
+        # Download server (for balance)
+        server_idx = block_idx % n_servers
+        # Success flag
+        success = False
 
-        # Pandas dataframe
-        data = _deserialize(response)
-        id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
-        count = len(data[id_col].unique())
+        # Loop through until we download or timeout
+        while success is False and timeout <= 10:
+            try:            
+                # Query API with (POST METHOD)
+                url = (
+                    f"http://{self.block_servers[server_idx]}:9006/get_block/"
+                    f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
+                )
+                response = requests.get(url).content
+
+                # Pandas dataframe
+                data = _deserialize(response)
+                # ID and count
+                id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
+                count = len(data[id_col].unique())
+
+                success = True
+            except:
+                sleep(timeout)
+                server_id = (server_idx + 1) % n_servers
+                
+                # Raise timeout if we've tried all servers once
+                if (server_idx % n_servers) == (block_idx % n_servers):
+                    timeout += 1
+        
+        # If download fails, raise exception 
+        if success is False:
+            raise TimeoutError("Lightcurve servers unavailable, try again later")
+
         # Write to disk or return in memory
         if save_dir is not None:
             lcs = LightCurveCollection(data, self.index, id_col)
