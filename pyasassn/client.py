@@ -10,6 +10,7 @@ import re
 import os
 import pyarrow as pa
 import warnings
+from time import sleep
 
 from .utils import LightCurveCollection
 
