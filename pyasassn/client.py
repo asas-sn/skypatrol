@@ -478,7 +478,7 @@ class SkyPatrolClient:
                 success = True
             except:
                 sleep(timeout)
-                server_id = (server_idx + 1) % n_servers
+                server_idx = (server_idx + 1) % n_servers
                 
                 # Raise timeout if we've tried all servers once
                 if (server_idx % n_servers) == (block_idx % n_servers):
