@@ -10,6 +10,7 @@ import re
 import os
 import pyarrow as pa
 import warnings
+import traceback
 from time import sleep
 
 from .utils import LightCurveCollection
@@ -274,7 +275,7 @@ class SkyPatrolClient:
             cols.append(id_col)
 
         if type(target_ids) in [str, int]:
-            tar_ids = [target_ids]
+            target_ids = [target_ids]
 
         # Query API with list (POST METHOD)
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_targets/catalog_list"
@@ -450,7 +451,7 @@ class SkyPatrolClient:
     def _get_lightcurve_chunk(
         self, query_hash, block_idx, catalog, save_dir, file_format
     ):
-        # Avalable servers
+        # Available servers
         n_servers = len(self.block_servers)
         # Start timeout at 0
         timeout = 1
@@ -477,6 +478,7 @@ class SkyPatrolClient:
 
                 success = True
             except:
+                print(traceback.format_exc(), flush=True)
                 sleep(timeout)
                 server_idx = (server_idx + 1) % n_servers
                 
