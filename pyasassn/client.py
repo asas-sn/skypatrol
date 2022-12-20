@@ -469,6 +469,7 @@ class SkyPatrolClient:
                     f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
                 )
                 response = requests.get(url).content
+                print(f"Pulling block {block_idx} from {self.block_servers[server_idx]}", flush=True)
 
                 # Pandas dataframe
                 data = _deserialize(response)
