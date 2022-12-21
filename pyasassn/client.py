@@ -8,8 +8,7 @@ import numpy as np
 import multiprocessing
 import re
 import os
-import pyarrow as pa
-import warnings
+import io
 import traceback
 from time import sleep
 
@@ -461,7 +460,7 @@ class SkyPatrolClient:
         success = False
 
         # Loop through until we download or timeout
-        while success is False and timeout <= 10:
+        while success is False and timeout <= 5:
             try:            
                 # Query API with (POST METHOD)
                 url = (
@@ -472,7 +471,7 @@ class SkyPatrolClient:
                 print(f"Pulling block {block_idx} from {self.block_servers[server_idx]}", flush=True)
 
                 # Pandas dataframe
-                data = _deserialize(response)
+                data = _deserialize(response.content)
                 # ID and count
                 id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
                 count = len(data[id_col].unique())
@@ -571,12 +570,9 @@ class SkyPatrolClient:
             return self.__dict__[item]
 
 
-def _deserialize(response):
-    # Deserialize from arrow
-    with warnings.catch_warnings():
-        warnings.simplefilter(action="ignore", category=FutureWarning)
-        buff = pa.py_buffer(response)
-        return pa.deserialize(buff)
+def _deserialize(buffer):
+    # Deserialize from bytes
+    return pd.read_parquet(io.BytesIO(buffer))
 
 
 def _arc_to_deg(arc, unit):
