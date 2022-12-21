@@ -467,8 +467,7 @@ class SkyPatrolClient:
                     f"http://{self.block_servers[server_idx]}:9006/get_block/"
                     f"query_hash-{query_hash}-block_idx-{block_idx}-catalog-{catalog}"
                 )
-                response = requests.get(url).content
-                print(f"Pulling block {block_idx} from {self.block_servers[server_idx]}", flush=True)
+                response = requests.get(url)
 
                 # Pandas dataframe
                 data = _deserialize(response.content)
@@ -478,7 +477,6 @@ class SkyPatrolClient:
 
                 success = True
             except:
-                print(traceback.format_exc(), flush=True)
                 sleep(timeout)
                 server_idx = (server_idx + 1) % n_servers
                 
