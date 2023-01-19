@@ -1,6 +1,6 @@
 requests
 pandas
-pyarrow==4.0.1
+pyarrow
 astropy
 numpy
 matplotlib
