@@ -486,7 +486,7 @@ Requires an index and light curve files saved from previous collection
 <p>Object for analysing and visualizing ASAS-SN Sky Patrol light curves.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyasassn.utils.LightCurve.find_period">
-<span class="sig-name descname"><span class="pre">find_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.find_period" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">find_period</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequency</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">power</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">best_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phot_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.find_period" title="Permalink to this definition">#</a></dt>
 <dd><p>Find the period of the light curve given the power spectrum produced by lomb_scargle.
 Also produces a phase-folded plot of the light curve.</p>
 <dl class="field-list simple">
@@ -497,9 +497,10 @@ Also produces a phase-folded plot of the light curve.</p>
 <li><p><strong>best_frequency</strong> – peak frequency for phase folding the light curve</p></li>
 <li><p><strong>plot</strong> – if True, then the function also produces a plot of the phase-folded light curve</p></li>
 <li><p><strong>figsize</strong> – size of the plot</p></li>
-<li><p><strong>savefile</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
+<li><p><strong>save_file</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
 <li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
 <li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
+<li><p><strong>phot_filter</strong> – specify bandpass filter for photometry, either g, V, or all, defaults to g</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -510,7 +511,7 @@ Also produces a phase-folded plot of the light curve.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyasassn.utils.LightCurve.lomb_scargle">
-<span class="sig-name descname"><span class="pre">lomb_scargle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nterms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'standard'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_per_peak</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nyquist_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.lomb_scargle" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">lomb_scargle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fit_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">center_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nterms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'standard'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimum_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maximum_frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples_per_peak</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nyquist_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phot_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.lomb_scargle" title="Permalink to this definition">#</a></dt>
 <dd><p>Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
 light curve. Default values work for most variable sources.</p>
 <dl class="field-list simple">
@@ -537,8 +538,9 @@ light curve. Default values work for most variable sources.</p>
 <li><p><strong>nyquist_factor</strong> – The multiple of the average nyquist frequency used to choose the maximum frequency if maximum_frequency is not provided.</p></li>
 <li><p><strong>plot</strong> – if True, then the function also produces a plot of the power spectrum.</p></li>
 <li><p><strong>figsize</strong> – size of the plot.</p></li>
-<li><p><strong>savefile</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
+<li><p><strong>save_file</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
 <li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
+<li><p><strong>phot_filter</strong> – specify bandpass filter for photometry, either g, V, or all, defaults to g</p></li>
 <li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
 </ul>
 </dd>
@@ -550,14 +552,16 @@ light curve. Default values work for most variable sources.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyasassn.utils.LightCurve.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">savefile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.plot" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(12,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phot_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.plot" title="Permalink to this definition">#</a></dt>
 <dd><p>Plots the given light curve with error bars.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>figsize</strong> – size of the plot</p></li>
-<li><p><strong>savefile</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
+<li><p><strong>save_file</strong> – file name to save the plot; if None plot will be directly displayed</p></li>
 <li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
+<li><p><strong>phot_filter</strong> – specify bandpass filter for photometry, either g, V, or all, defaults to g</p></li>
+<li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -569,18 +573,10 @@ light curve. Default values work for most variable sources.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyasassn.utils.LightCurve.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'parquet'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurve.save" title="Permalink to this definition">#</a></dt>
-<dd><p>Save the light curve to csv.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> – filename to save this light curve.</p></li>
-<li><p><strong>file_format</strong> – file format of saved objects [‘parquet’, ‘csv’, ‘pickle’]</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>void</p>
-</dd>
-</dl>
+<dd><p>Save the light curve to csv.
+:param filename: filename to save this light curve.
+:param file_format: file format of saved objects [‘parquet’, ‘csv’, ‘pickle’]
+:return: void</p>
 </dd></dl>
 
 </dd></dl>
@@ -593,7 +589,7 @@ light curve. Default values work for most variable sources.</p>
 Returned by any SkyPatrolClient query where download=True</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection.apply_function">
-<span class="sig-name descname"><span class="pre">apply_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.apply_function" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">apply_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mag'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phot_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.apply_function" title="Permalink to this definition">#</a></dt>
 <dd><p>Apply a custom aggregate function to all light curves in the collection.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -605,18 +601,15 @@ Returned by any SkyPatrolClient query where download=True</p>
 </dd>
 </dl>
 <p>:param include_poor_images whether or not to include images of poor or unknown quality; defaults to False
+:param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
 :return: pandas Dataframe with results</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection.itercurves">
 <span class="sig-name descname"><span class="pre">itercurves</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.itercurves" title="Permalink to this definition">#</a></dt>
-<dd><p>Generator to iterate through all light curves in the collection.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>a generator that iterates over the collection</p>
-</dd>
-</dl>
+<dd><p>Generator to iterate through all light curves in the collection.
+:return: a generator that iterates over the collection</p>
 </dd></dl>
 
 <dl class="py method">
@@ -632,14 +625,14 @@ Returned by any SkyPatrolClient query where download=True</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>filenames</p>
+<dd class="field-even"><p>a list of file names</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pyasassn.utils.LightCurveCollection.stats">
-<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.stats" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">include_non_det</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_poor_images</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phot_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'g'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pyasassn.utils.LightCurveCollection.stats" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculate simple aggregate statistics on the collection.
 Gets the mean and stddev magnitude for each curve as well as the total number of epochs observed.</p>
 <dl class="field-list simple">
@@ -647,6 +640,7 @@ Gets the mean and stddev magnitude for each curve as well as the total number of
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>include_poor_images</strong> – whether or not to include images of poor or unknown quality; defaults to False</p></li>
 <li><p><strong>include_non_det</strong> – whether or not to include non-detection events in analysis; defaults to False</p></li>
+<li><p><strong>phot_filter</strong> – specify bandpass filter for photometry, either g, V, or all, defaults to g</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
