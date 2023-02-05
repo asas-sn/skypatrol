@@ -1,7 +1,5 @@
 from __future__ import division, print_function
-
 import os
-
 from astropy.timeseries import LombScargle
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -19,9 +17,14 @@ class LightCurveCollection(object):
         self.id_col = id_col
         self.data = data
         self.catalog_info = catalog_info
+        # Add filter column
+        Vcams = ['ba', 'bb', 'bc', 'bd', 'be', 'bf', 'bg', 'bh']
+        gcams = ['bA', 'bB', 'bC', 'bD', 'bE', 'bF', 'bG', 'bH',
+                 'bi', 'bj', 'bk', 'bl', 'bm', 'bn', 'bo', 'bp', 'bq', 'br', 'bs', 'bt']
+        self.data['phot_filter'] = self.data.camera.apply(lambda x: 'V' if x in Vcams else 'g' if x in gcams else None)
 
     def apply_function(
-        self, func, col="mag", include_non_det=False, include_poor_images=False
+        self, func, col="mag", include_non_det=False, include_poor_images=False, phot_filter='g'
     ):
         """
         Apply a custom aggregate function to all light curves in the collection.
@@ -30,6 +33,7 @@ class LightCurveCollection(object):
         :param col: column to apply aggregate function; defaluts to 'mag'
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :param include_poor_images whether or not to include images of poor or unknown quality; defaults to False
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
         :return: pandas Dataframe with results
         """
 
@@ -40,15 +44,28 @@ class LightCurveCollection(object):
         if not include_poor_images:
             data = data[data["quality"] == "G"]
 
+        # Filter by filter
+        if phot_filter == 'g':
+            data = data[data['phot_filter'] == 'g']
+        elif phot_filter == 'V':
+            data = data[data['phot_filter'] == 'V']
+        elif phot_filter == 'all':
+            pass
+        else:
+            raise ValueError("phot_filter must be in ['g', 'V', 'all']")
+
         return data.groupby(self.id_col).agg({col: func})
 
-    def stats(self, include_non_det=False, include_poor_images=False):
+    def stats(
+            self, include_non_det=False, include_poor_images=False, phot_filter='g'
+    ):
         """
         Calculate simple aggregate statistics on the collection.
         Gets the mean and stddev magnitude for each curve as well as the total number of epochs observed.
 
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
         :return: pandas Dataframe with results
         """
         # Filter preferences for this function call only
@@ -57,6 +74,16 @@ class LightCurveCollection(object):
             data = data[data["mag_err"] < 99]
         if not include_poor_images:
             data = data[data["quality"] == "G"]
+
+        # Filter by filter
+        if phot_filter == 'g':
+            data = data[data['phot_filter'] == 'g']
+        elif phot_filter == 'V':
+            data = data[data['phot_filter'] == 'V']
+        elif phot_filter == 'all':
+            pass
+        else:
+            raise ValueError("phot_filter must be in ['g', 'V', 'all']")
 
         return data.groupby(self.id_col).agg(
             mean_mag=("mag", "mean"), std_mag=("mag", "std"), epochs=("mag", "count")
@@ -80,7 +107,6 @@ class LightCurveCollection(object):
     def itercurves(self):
         """
         Generator to iterate through all light curves in the collection.
-
         :return: a generator that iterates over the collection
         """
         for key, data in self.data.groupby(self.id_col):
@@ -91,14 +117,16 @@ class LightCurveCollection(object):
     def __len__(self):
         return len(self.catalog_info)
 
-    def save(self, save_dir, file_format="parquet", include_index=True):
+    def save(
+            self, save_dir, file_format="parquet", include_index=True
+    ):
         """
         Saves entire light curve collection to a given directory.
 
         :param save_dir: directory name
         :param file_format: file format of saved objects ['parquet', 'csv', 'pickle']
         :param include_index: whether or not to save index (catalog_info)
-        :return: filenames
+        :return: a list of file names
         """
         filenames = []
         if file_format == "parquet":
@@ -159,10 +187,11 @@ class LightCurve:
         ):
             raise AttributeError("Must have 'jd'(julian date), 'mag' and 'mag_err'")
 
-    def save(self, filename, file_format="parquet"):
+    def save(
+            self, filename, file_format="parquet"
+    ):
         """
         Save the light curve to csv.
-
         :param filename: filename to save this light curve.
         :param file_format: file format of saved objects ['parquet', 'csv', 'pickle']
         :return: void
@@ -180,46 +209,77 @@ class LightCurve:
                 f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']"
             )
 
-    def plot(self, figsize=(12, 8), savefile=None, include_poor_images=False):
+    def plot(
+            self,
+            figsize=(12, 8),
+            save_file=None,
+            include_poor_images=False,
+            include_non_det=True,
+            phot_filter='g'
+    ):
         """
         Plots the given light curve with error bars.
 
         :param figsize: size of the plot
-        :param savefile: file name to save the plot; if None plot will be directly displayed
+        :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
+        :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: void
         """
         # Filter preferences
         data = self.data
+
+        # Filter out pool quality images
         if not include_poor_images:
             data = data[data["quality"] == "G"]
 
+        # Filter detections
         errors = data.mag_err > 99
+        detections = data[~errors]
 
+        # Plot
         plt.figure(figsize=figsize)
-        plt.errorbar(
-            x=data[~errors].jd - 2450000,
-            y=data[~errors].mag,
-            yerr=data[~errors].mag_err,
-            fmt="o",
-            c="teal",
-            label="detections",
-        )
-        plt.errorbar(
-            x=data[errors].jd - 2450000,
-            y=data[errors].mag,
-            fmt="v",
-            c="red",
-            label="non-detections",
-        )
+        # Diff colors for filters
+        if phot_filter in ['g', 'all']:
+            plt.errorbar(
+                x=detections[detections['phot_filter'] == 'g'].jd - 2450000,
+                y=detections[detections['phot_filter'] == 'g'].mag,
+                yerr=detections[detections['phot_filter'] == 'g'].mag_err,
+                fmt="o",
+                c="blue",
+                label="g band",
+            )
+        if phot_filter in ['V', 'all']:
+            plt.errorbar(
+                x=detections[detections['phot_filter'] == 'V'].jd - 2450000,
+                y=detections[detections['phot_filter'] == 'V'].mag,
+                yerr=detections[detections['phot_filter'] == 'V'].mag_err,
+                fmt="o",
+                c="green",
+                label="V band",
+            )
+        if phot_filter not in ['g', 'V', 'all']:
+            raise ValueError("phot_filter must be in ['g', 'V', 'all']")
+
+        # Plot non-detections
+        if include_non_det:
+            plt.errorbar(
+                x=data[errors].jd - 2450000,
+                y=data[errors].mag,
+                fmt="v",
+                c="red",
+                label="non-detections",
+            )
+        # Label plots
         self._label_plots()
         plt.legend()
         plt.xlabel("Date (JD-2450000)")
         plt.ylabel("Magnitude")
         plt.gca().invert_yaxis()
 
-        if savefile:
-            plt.savefig(savefile)
+        if save_file:
+            plt.savefig(save_file)
         else:
             plt.show()
 
@@ -236,9 +296,10 @@ class LightCurve:
         nyquist_factor=5,
         plot=True,
         figsize=(12, 8),
-        savefile=None,
+        save_file=None,
         include_poor_images=False,
         include_non_det=False,
+        phot_filter='g'
     ):
         """
         Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
@@ -270,8 +331,9 @@ class LightCurve:
         :param nyquist_factor: The multiple of the average nyquist frequency used to choose the maximum frequency if maximum_frequency is not provided.
         :param plot: if True, then the function also produces a plot of the power spectrum.
         :param figsize: size of the plot.
-        :param savefile: file name to save the plot; if None plot will be directly displayed
+        :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: power, frequency and the astropy LombScargle object
         """
@@ -281,6 +343,16 @@ class LightCurve:
             data = data[data["mag_err"] < 99]
         if not include_poor_images:
             data = data[data["quality"] == "G"]
+
+        # Filter by filter
+        if phot_filter == 'g':
+            data = data[data['phot_filter'] == 'g']
+        elif phot_filter == 'V':
+            data = data[data['phot_filter'] == 'V']
+        elif phot_filter == 'all':
+            pass
+        else:
+            raise ValueError("phot_filter must be in ['g', 'V', 'all']")
 
         ls = LombScargle(
             data.jd,
@@ -307,8 +379,8 @@ class LightCurve:
             plt.xlabel("Frequency")
             plt.ylabel("Power")
 
-            if savefile:
-                plt.savefig(savefile)
+            if save_file:
+                plt.savefig(save_file)
             else:
                 plt.show()
         return frequency, power, ls
@@ -320,9 +392,10 @@ class LightCurve:
         best_frequency=None,
         plot=True,
         figsize=(12, 8),
-        savefile=None,
+        save_file=None,
         include_poor_images=False,
         include_non_det=False,
+        phot_filter='g'
     ):
         """
         Find the period of the light curve given the power spectrum produced by lomb_scargle.
@@ -333,9 +406,10 @@ class LightCurve:
         :param best_frequency: peak frequency for phase folding the light curve
         :param plot: if True, then the function also produces a plot of the phase-folded light curve
         :param figsize: size of the plot
-        :param savefile: file name to save the plot; if None plot will be directly displayed
+        :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
         :return: period of the light curve
         """
         # Filter preferences for this function call only
@@ -345,6 +419,7 @@ class LightCurve:
         if not include_poor_images:
             data = data[data["quality"] == "G"]
 
+        # Get frequency
         if best_frequency is None:
             best_frequency = frequency[np.argmax(power)]
 
@@ -352,21 +427,38 @@ class LightCurve:
         period = 1 / best_frequency
 
         if plot:
-            folded_jd = data.jd % period
-
-            # Concatenate for multiple peaks
-            x = np.concatenate([folded_jd / period, folded_jd / period + 1])
-            y = np.concatenate([data.mag, data.mag])
-
             plt.figure(figsize=figsize)
-            plt.scatter(x, y)
+
+            if phot_filter in ['g', 'all']:
+                # Filter for filter
+                plot_data = data[data['phot_filter'] == 'g']
+
+                folded_jd = plot_data.jd % period
+                # Concatenate for multiple peaks
+                x = np.concatenate([folded_jd / period, folded_jd / period + 1])
+                y = np.concatenate([plot_data.mag, plot_data.mag])
+                plt.scatter(x, y, c='blue', label='g band')
+
+            if phot_filter in ['V', 'all']:
+                # Filter for filter
+                plot_data = data[data['phot_filter'] == 'V']
+
+                folded_jd = plot_data.jd % period
+                # Concatenate for multiple peaks
+                x = np.concatenate([folded_jd / period, folded_jd / period + 1])
+                y = np.concatenate([plot_data.mag, plot_data.mag])
+                plt.scatter(x, y, c='green', label='V band')
+            if phot_filter not in ['g', 'V', 'all']:
+                raise ValueError("phot_filter must be in ['g', 'V', 'all']")
+
+            # Create labels
             self._label_plots()
             plt.xlabel("Phase")
             plt.ylabel("Magnitude")
             plt.gca().invert_yaxis()
 
-            if savefile:
-                plt.savefig(savefile)
+            if save_file:
+                plt.savefig(save_file)
             else:
                 plt.show()
 

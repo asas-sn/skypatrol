@@ -605,13 +605,13 @@ def load_collection(save_dir, file_format="parquet"):
 
     elif file_format == "pickle":
         index = pd.read_pickle(os.path.join(save_dir, "index.pkl"))
-        lc_files = glob(os.path.join(save_dir, "*.pkl"))
+        files = glob(os.path.join(save_dir, "*.pkl"))
         lc_files = list(filter(lambda i: os.path.basename(i) != "index.pkl", files))
         data = pd.concat(pd.read_pickle(file) for file in lc_files)
 
     elif file_format == "csv":
         index = pd.read_csv(os.path.join(save_dir, "index.csv"))
-        lc_files = glob(os.path.join(save_dir, "*.csv"))
+        files = glob(os.path.join(save_dir, "*.csv"))
         lc_files = list(filter(lambda i: os.path.basename(i) != "index.csv", files))
         data = pd.concat(pd.read_csv(file) for file in lc_files)
 
