@@ -212,15 +212,17 @@ class LightCurve:
     def plot(
             self,
             figsize=(12, 8),
+            font_size=10,
             save_file=None,
             include_poor_images=False,
             include_non_det=True,
-            phot_filter='g'
+            phot_filter='g',
     ):
         """
         Plots the given light curve with error bars.
 
-        :param figsize: size of the plot
+        :param figsize: size of the plot.
+        :param font_size: font size for the plotting.
         :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
@@ -240,6 +242,9 @@ class LightCurve:
 
         # Plot
         plt.figure(figsize=figsize)
+
+        # Set font size
+        plt.rcParams.update({'font.size': font_size})
         # Diff colors for filters
         if phot_filter in ['g', 'all']:
             plt.errorbar(
@@ -247,7 +252,7 @@ class LightCurve:
                 y=detections[detections['phot_filter'] == 'g'].mag,
                 yerr=detections[detections['phot_filter'] == 'g'].mag_err,
                 fmt="o",
-                c="blue",
+                c="cornflowerblue",
                 label="g band",
             )
         if phot_filter in ['V', 'all']:
@@ -256,7 +261,7 @@ class LightCurve:
                 y=detections[detections['phot_filter'] == 'V'].mag,
                 yerr=detections[detections['phot_filter'] == 'V'].mag_err,
                 fmt="o",
-                c="green",
+                c="mediumaquamarine",
                 label="V band",
             )
         if phot_filter not in ['g', 'V', 'all']:
@@ -272,7 +277,7 @@ class LightCurve:
                 label="non-detections",
             )
         # Label plots
-        self._label_plots()
+        self._label_plots(font_size)
         plt.legend()
         plt.xlabel("Date (JD-2450000)")
         plt.ylabel("Magnitude")
@@ -282,6 +287,9 @@ class LightCurve:
             plt.savefig(save_file)
         else:
             plt.show()
+
+        # Reset font size (default = 10)
+        plt.rcParams.update({'font.size': 10})
 
     def lomb_scargle(
         self,
@@ -296,6 +304,7 @@ class LightCurve:
         nyquist_factor=5,
         plot=True,
         figsize=(12, 8),
+        font_size=10,
         save_file=None,
         include_poor_images=False,
         include_non_det=False,
@@ -331,6 +340,7 @@ class LightCurve:
         :param nyquist_factor: The multiple of the average nyquist frequency used to choose the maximum frequency if maximum_frequency is not provided.
         :param plot: if True, then the function also produces a plot of the power spectrum.
         :param figsize: size of the plot.
+        :param font_size: font size for the plotting.
         :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
@@ -373,9 +383,11 @@ class LightCurve:
         )
         if plot:
             plt.figure(figsize=figsize)
+            # Set font size
+            plt.rcParams.update({'font.size': font_size})
 
             plt.plot(frequency, power)
-            self._label_plots()
+            self._label_plots(font_size)
             plt.xlabel("Frequency")
             plt.ylabel("Power")
 
@@ -383,6 +395,10 @@ class LightCurve:
                 plt.savefig(save_file)
             else:
                 plt.show()
+
+            # Reset font size (default = 10)
+            plt.rcParams.update({'font.size': 10})
+
         return frequency, power, ls
 
     def find_period(
@@ -392,6 +408,7 @@ class LightCurve:
         best_frequency=None,
         plot=True,
         figsize=(12, 8),
+        font_size=10,
         save_file=None,
         include_poor_images=False,
         include_non_det=False,
@@ -406,6 +423,7 @@ class LightCurve:
         :param best_frequency: peak frequency for phase folding the light curve
         :param plot: if True, then the function also produces a plot of the phase-folded light curve
         :param figsize: size of the plot
+        :param font_size: font size for the plotting.
         :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
@@ -428,6 +446,8 @@ class LightCurve:
 
         if plot:
             plt.figure(figsize=figsize)
+            # Set font size
+            plt.rcParams.update({'font.size': font_size})
 
             if phot_filter in ['g', 'all']:
                 # Filter for filter
@@ -437,7 +457,7 @@ class LightCurve:
                 # Concatenate for multiple peaks
                 x = np.concatenate([folded_jd / period, folded_jd / period + 1])
                 y = np.concatenate([plot_data.mag, plot_data.mag])
-                plt.scatter(x, y, c='blue', label='g band')
+                plt.scatter(x, y, c='cornflowerblue', label='g band')
 
             if phot_filter in ['V', 'all']:
                 # Filter for filter
@@ -447,12 +467,12 @@ class LightCurve:
                 # Concatenate for multiple peaks
                 x = np.concatenate([folded_jd / period, folded_jd / period + 1])
                 y = np.concatenate([plot_data.mag, plot_data.mag])
-                plt.scatter(x, y, c='green', label='V band')
+                plt.scatter(x, y, c='mediumaquamarine', label='V band')
             if phot_filter not in ['g', 'V', 'all']:
                 raise ValueError("phot_filter must be in ['g', 'V', 'all']")
 
             # Create labels
-            self._label_plots()
+            self._label_plots(font_size)
             plt.xlabel("Phase")
             plt.ylabel("Magnitude")
             plt.gca().invert_yaxis()
@@ -461,10 +481,12 @@ class LightCurve:
                 plt.savefig(save_file)
             else:
                 plt.show()
+        # Reset font size (default = 10)
+        plt.rcParams.update({'font.size': 10})
 
         return period
 
-    def _label_plots(self):
+    def _label_plots(self, font_size):
         suptitle = ""
         title = ""
         if "asas_sn_id" in self.meta.columns:
@@ -477,6 +499,6 @@ class LightCurve:
             title += f"\nDeclination: {self.meta.dec_deg.item():.05f}"
 
         title += f"\nEpochs: {self.epochs}"
-        plt.title(title, loc="left", fontsize=10)
-        plt.suptitle(suptitle, fontsize=14)
+        plt.title(title, loc="left", fontsize=font_size - 2)
+        plt.suptitle(suptitle, fontsize=font_size + 2)
         plt.grid()
