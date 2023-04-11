@@ -252,7 +252,7 @@ class LightCurve:
                 y=detections[detections['phot_filter'] == 'g'].mag,
                 yerr=detections[detections['phot_filter'] == 'g'].mag_err,
                 fmt="o",
-                c="cornflowerblue",
+                c="mediumblue",
                 label="g band",
             )
         if phot_filter in ['V', 'all']:
@@ -261,7 +261,7 @@ class LightCurve:
                 y=detections[detections['phot_filter'] == 'V'].mag,
                 yerr=detections[detections['phot_filter'] == 'V'].mag_err,
                 fmt="o",
-                c="mediumaquamarine",
+                c="teal",
                 label="V band",
             )
         if phot_filter not in ['g', 'V', 'all']:
@@ -457,7 +457,7 @@ class LightCurve:
                 # Concatenate for multiple peaks
                 x = np.concatenate([folded_jd / period, folded_jd / period + 1])
                 y = np.concatenate([plot_data.mag, plot_data.mag])
-                plt.scatter(x, y, c='cornflowerblue', label='g band')
+                plt.scatter(x, y, c='mediumblue', label='g band')
 
             if phot_filter in ['V', 'all']:
                 # Filter for filter
@@ -467,7 +467,7 @@ class LightCurve:
                 # Concatenate for multiple peaks
                 x = np.concatenate([folded_jd / period, folded_jd / period + 1])
                 y = np.concatenate([plot_data.mag, plot_data.mag])
-                plt.scatter(x, y, c='mediumaquamarine', label='V band')
+                plt.scatter(x, y, c='teal', label='V band')
             if phot_filter not in ['g', 'V', 'all']:
                 raise ValueError("phot_filter must be in ['g', 'V', 'all']")
 
