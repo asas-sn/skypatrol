@@ -423,7 +423,7 @@ class LightCurve:
         :param power: power from lomb_scargle()
         :param best_frequency: peak frequency for phase folding the light curve
         :param plot: if True, then the function also produces a plot of the phase-folded light curve
-        :param reference_epoch: either 'max' or 'min', corresponding to the time of maximum/minimum magnitude in the light curve
+        :param reference_epoch: either 'max' or 'min', corresponding to the time of maximum/minimum flux in the light curve
         :param figsize: size of the plot
         :param font_size: font size for the plotting.
         :param save_file: file name to save the plot; if None plot will be directly displayed
@@ -457,9 +457,9 @@ class LightCurve:
 
                 #Get reference epoch for phasing
                 if reference_epoch=='max':
-                    ref_epoch=plot_data['jd'][plot_data.mag.idxmax()]
-                elif reference_epoch=='min':
                     ref_epoch=plot_data['jd'][plot_data.mag.idxmin()]
+                elif reference_epoch=='min':
+                    ref_epoch=plot_data['jd'][plot_data.mag.idxmax()]
                 else:
                     ref_epoch=0.0
 
