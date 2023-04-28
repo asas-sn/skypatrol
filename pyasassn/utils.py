@@ -407,6 +407,7 @@ class LightCurve:
         power,
         best_frequency=None,
         plot=True,
+        reference_epoch='max',
         figsize=(12, 8),
         font_size=10,
         save_file=None,
@@ -422,6 +423,7 @@ class LightCurve:
         :param power: power from lomb_scargle()
         :param best_frequency: peak frequency for phase folding the light curve
         :param plot: if True, then the function also produces a plot of the phase-folded light curve
+        :param reference_epoch: either 'max' or 'min', corresponding to the time of maximum/minimum flux in the light curve
         :param figsize: size of the plot
         :param font_size: font size for the plotting.
         :param save_file: file name to save the plot; if None plot will be directly displayed
@@ -453,9 +455,17 @@ class LightCurve:
                 # Filter for filter
                 plot_data = data[data['phot_filter'] == 'g']
 
-                folded_jd = plot_data.jd % period
+                #Get reference epoch for phasing
+                if reference_epoch=='max':
+                    ref_epoch=plot_data['jd'][plot_data.mag.idxmin()]
+                elif reference_epoch=='min':
+                    ref_epoch=plot_data['jd'][plot_data.mag.idxmax()]
+                else:
+                    ref_epoch=0.0
+
+                phase=((plot_data.jd-ref_epoch)/period)%1
                 # Concatenate for multiple peaks
-                x = np.concatenate([folded_jd / period, folded_jd / period + 1])
+                x = np.concatenate([phase, phase + 1])
                 y = np.concatenate([plot_data.mag, plot_data.mag])
                 plt.scatter(x, y, c='mediumblue', label='g band')
 
@@ -463,9 +473,17 @@ class LightCurve:
                 # Filter for filter
                 plot_data = data[data['phot_filter'] == 'V']
 
-                folded_jd = plot_data.jd % period
+                #Get reference epoch for phasing
+                if reference_epoch=='max':
+                    ref_epoch=plot_data['jd'][plot_data.mag.idxmax()]
+                elif reference_epoch=='min':
+                    ref_epoch=plot_data['jd'][plot_data.mag.idxmin()]
+                else:
+                    ref_epoch=0.0
+
+                phase=((plot_data.jd-ref_epoch)/period)%1
                 # Concatenate for multiple peaks
-                x = np.concatenate([folded_jd / period, folded_jd / period + 1])
+                x = np.concatenate([phase, phase + 1])
                 y = np.concatenate([plot_data.mag, plot_data.mag])
                 plt.scatter(x, y, c='teal', label='V band')
             if phot_filter not in ['g', 'V', 'all']:
