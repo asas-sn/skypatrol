@@ -22,6 +22,7 @@ class LightCurveCollection(object):
         gcams = ['bA', 'bB', 'bC', 'bD', 'bE', 'bF', 'bG', 'bH',
                  'bi', 'bj', 'bk', 'bl', 'bm', 'bn', 'bo', 'bp', 'bq', 'br', 'bs', 'bt']
         self.data['phot_filter'] = self.data.camera.apply(lambda x: 'V' if x in Vcams else 'g' if x in gcams else None)
+        self.data = self.data[self.data['phot_filter'].notna()]
 
     def apply_function(
         self, func, col="mag", include_non_det=False, include_poor_images=False, phot_filter='g'
