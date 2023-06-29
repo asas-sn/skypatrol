@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
+from .wavelet import LS_wavelet
 
 class LightCurveCollection(object):
     """
@@ -401,6 +402,45 @@ class LightCurve:
             plt.rcParams.update({'font.size': 10})
 
         return frequency, power, ls
+
+    def wavelet_power(
+        self,
+        tt,
+        ff,
+        include_poor_images=False,
+        include_non_det=True,
+        phot_filter='g',
+        tradeoff=2
+        ):
+        '''
+        Constructs a wavelet-transform power spectrum.
+
+        :param tt: Array of times at which to evaluate wavelet PS
+        :param ff: Array of frequencies at which to evaluate wavelet PS
+        :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
+        :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
+        :tradeoff: Tradeoff parameter between frequency and time resolution
+
+        :return: numpy array containing wavelet power at provided times and frequencies.
+        '''
+
+        # Filter preferences
+        data = self.data
+
+        # Filter out pool quality images
+        if not include_poor_images:
+            data = data[data["quality"] == "G"]
+
+        # Filter detections
+        errors = data.mag_err > 99
+        detections = data[~errors]
+
+        x = detections.jd
+        y = detections.mag
+        e_y = detections.mag_err
+
+        return LS_wavelet(tt, ff, x, y, e_y, Γ=tradeoff)
 
     def find_period(
         self,
