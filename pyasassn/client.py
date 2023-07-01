@@ -98,11 +98,23 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
-            tar_ids = list(tar_df["asas_sn_id"])
+            if "asas_sn_id" in tar_df.columns:
+                id_col = "asas_sn_id"
+                catalog = "extrasolar"
+            elif "comets" in query_str:
+                id_col = "name"
+                catalog = "comets"
+            elif "asteroids" in query_str:
+                id_col = "name"
+                catalog = "asteroids"
+            else:
+                raise ValueError("needs propper id column to download lightcurves")
+            # Get tar ids
+            tar_ids = list(id_col)
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
             return self._get_curves(
-                query_hash, tar_ids, "extrasolar", save_dir, file_format, threads
+                query_hash, tar_ids, catalog, save_dir, file_format, threads
             )
 
     def cone_search(

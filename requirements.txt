@@ -4,3 +4,4 @@ pyarrow
 astropy
 numpy
 matplotlib
+tqdm
