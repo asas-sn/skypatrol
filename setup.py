@@ -20,7 +20,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="skypatrol",
-    version="0.6.11",
+    version="0.6.12",
     url="https://github.com/asas_sn/skypatrol/",
     author="ASAS-SN",
     author_email="kylehart@hawaii.edu",
