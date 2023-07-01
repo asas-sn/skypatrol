@@ -7,6 +7,7 @@ import numpy as np
 
 from .wavelet import LS_wavelet
 
+
 class LightCurveCollection(object):
     """
     Object for storing and analysing ASAS-SN Sky Patrol light curves.
@@ -20,13 +21,13 @@ class LightCurveCollection(object):
         self.catalog_info = catalog_info
         # Add filter column
         Vcams = ['ba', 'bb', 'bc', 'bd', 'be', 'bf', 'bg', 'bh']
-        gcams = ['bA', 'bB', 'bC', 'bD', 'bE', 'bF', 'bG', 'bH',
+        gcams = ['bA', 'bB', 'cB', 'bC', 'bD', 'bE', 'bF', 'bG', 'bH',
                  'bi', 'bj', 'bk', 'bl', 'bm', 'bn', 'bo', 'bp', 'bq', 'br', 'bs', 'bt']
         self.data['phot_filter'] = self.data.camera.apply(lambda x: 'V' if x in Vcams else 'g' if x in gcams else None)
         self.data = self.data[self.data['phot_filter'].notna()]
 
     def apply_function(
-        self, func, col="mag", include_non_det=False, include_poor_images=False, phot_filter='g'
+        self, func, col="mag", include_non_det=False, include_poor_images=False, phot_filter='all'
     ):
         """
         Apply a custom aggregate function to all light curves in the collection.
@@ -35,7 +36,7 @@ class LightCurveCollection(object):
         :param col: column to apply aggregate function; defaluts to 'mag'
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :param include_poor_images whether or not to include images of poor or unknown quality; defaults to False
-        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to all
         :return: pandas Dataframe with results
         """
 
@@ -59,7 +60,7 @@ class LightCurveCollection(object):
         return data.groupby(self.id_col).agg({col: func})
 
     def stats(
-            self, include_non_det=False, include_poor_images=False, phot_filter='g'
+            self, include_non_det=False, include_poor_images=False, phot_filter='all'
     ):
         """
         Calculate simple aggregate statistics on the collection.
@@ -67,7 +68,7 @@ class LightCurveCollection(object):
 
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
-        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to all
         :return: pandas Dataframe with results
         """
         # Filter preferences for this function call only
@@ -172,12 +173,12 @@ class LightCurve:
     Object for analysing and visualizing ASAS-SN Sky Patrol light curves.
     """
 
-    def __init__(self, pandas_obj, meta):
+    def __init__(self, data, meta):
 
-        self._validate(pandas_obj)
-        self.data = pandas_obj
+        self._validate(data)
+        self.data = data
         self.meta = meta
-        self.epochs = len(pandas_obj)
+        self.epochs = len(data)
 
     @staticmethod
     def _validate(obj):
@@ -218,7 +219,7 @@ class LightCurve:
             save_file=None,
             include_poor_images=False,
             include_non_det=True,
-            phot_filter='g',
+            phot_filter='all',
     ):
         """
         Plots the given light curve with error bars.
@@ -227,7 +228,7 @@ class LightCurve:
         :param font_size: font size for the plotting.
         :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
-        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to all
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: void
         """
@@ -310,7 +311,7 @@ class LightCurve:
         save_file=None,
         include_poor_images=False,
         include_non_det=False,
-        phot_filter='g'
+        phot_filter='all'
     ):
         """
         Thin wrapper around the astropy LombScargle utility to determine frequency and power spectra of the given
@@ -345,7 +346,7 @@ class LightCurve:
         :param font_size: font size for the plotting.
         :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
-        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to all
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :return: power, frequency and the astropy LombScargle object
         """
@@ -409,7 +410,7 @@ class LightCurve:
         ff,
         include_poor_images=False,
         include_non_det=True,
-        phot_filter='g',
+        phot_filter='all',
         tradeoff=2
         ):
         '''
@@ -425,20 +426,28 @@ class LightCurve:
         :return: numpy array containing wavelet power at provided times and frequencies.
         '''
 
-        # Filter preferences
+        # Filter preferences for this function call only
         data = self.data
 
-        # Filter out pool quality images
+        if not include_non_det:
+            data = data[data["mag_err"] < 99]
         if not include_poor_images:
             data = data[data["quality"] == "G"]
 
-        # Filter detections
-        errors = data.mag_err > 99
-        detections = data[~errors]
+        # Filter by filter
+        if phot_filter == 'g':
+            data = data[data['phot_filter'] == 'g']
+        elif phot_filter == 'V':
+            data = data[data['phot_filter'] == 'V']
+        elif phot_filter == 'all':
+            pass
+        else:
+            raise ValueError("phot_filter must be in ['g', 'V', 'all']")
 
-        x = detections.jd
-        y = detections.mag
-        e_y = detections.mag_err
+        # Data for wavelet
+        x = data.jd
+        y = data.mag
+        e_y = data.mag_err
 
         return LS_wavelet(tt, ff, x, y, e_y, Γ=tradeoff)
 
@@ -454,7 +463,7 @@ class LightCurve:
         save_file=None,
         include_poor_images=False,
         include_non_det=False,
-        phot_filter='g'
+        phot_filter='all'
     ):
         """
         Find the period of the light curve given the power spectrum produced by lomb_scargle.
@@ -470,7 +479,7 @@ class LightCurve:
         :param save_file: file name to save the plot; if None plot will be directly displayed
         :param include_poor_images: whether or not to include images of poor or unknown quality; defaults to False
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
-        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
+        :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to all
         :return: period of the light curve
         """
         # Filter preferences for this function call only
@@ -496,7 +505,7 @@ class LightCurve:
                 # Filter for filter
                 plot_data = data[data['phot_filter'] == 'g']
 
-                #Get reference epoch for phasing
+                # Get reference epoch for phasing
                 if reference_epoch=='max':
                     ref_epoch=plot_data['jd'][plot_data.mag.idxmin()]
                 elif reference_epoch=='min':
@@ -514,7 +523,7 @@ class LightCurve:
                 # Filter for filter
                 plot_data = data[data['phot_filter'] == 'V']
 
-                #Get reference epoch for phasing
+                # Get reference epoch for phasing
                 if reference_epoch=='max':
                     ref_epoch=plot_data['jd'][plot_data.mag.idxmax()]
                 elif reference_epoch=='min':
@@ -561,3 +570,23 @@ class LightCurve:
         plt.title(title, loc="left", fontsize=font_size - 2)
         plt.suptitle(suptitle, fontsize=font_size + 2)
         plt.grid()
+
+
+def merge(lcs, name):
+    """
+    Merge a LightCurveCollection or list of LightCurves to a single object.
+    Useful for solar system objects with multiple designations.
+    :param lcs: LightCurveCollection or list of LightCurves
+    :param name: new name of the object
+    :return: LightCurve
+    """
+    # Get all phot data
+    if type(lcs) is list:
+        lcs_data = [lc.data for lc in lcs]
+    else:
+        lcs_data = [lc.data for lc in lcs.itercurves()]
+
+    return LightCurve(
+        data=pd.concat(lcs_data),
+        meta=pd.DataFrame({'name': [name]})
+    )
