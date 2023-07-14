@@ -16,13 +16,15 @@ class LightCurve:
 
     def __init__(self, data, meta):
         self._validate(data)
-        self.data = data.sort_values("jd")
+        self.data = data.sort_values("jd").reset_index(
+            drop=True
+        )  # Ensure times are sorted
         self.meta = meta
         self.epochs = len(data)
 
     def __repr__(self):
-        f = f"LightCurve of ASAS-SN {self.meta.asas_sn_id[0]} with {self.epochs} epochs \n"
-        return f + repr(self.data)
+        # f = f"LightCurve of ASAS-SN {self.meta.asas_sn_id[0]} with {self.epochs} epochs \n"
+        return self.data.__repr__()
 
     def __getattr__(self, name, **kwargs):
         """Expose all columns as attributes."""
@@ -429,6 +431,23 @@ class LightCurve:
         plt.suptitle(suptitle, fontsize=font_size + 2)
         plt.grid()
 
+    def normalize(self, method="median", col="mag"):
+        data = self.data.copy()
+        if method not in ["median", "gp"]:
+            raise ValueError("method must be in ['median', 'gp']")
+        if col not in ["mag", "flux"]:
+            raise ValueError("col must be in ['mag', 'flux']")
+
+        if method == "median":
+            data_norm = []
+            for camera in data.camera.unique():
+                lcx = data[data.camera == camera].copy()
+                lcx[col] /= lcx[col].median()
+                data_norm.append(lcx)
+            return LightCurve(pd.concat(data_norm), self.meta)
+        elif method == "gp":
+            pass
+
     def quality_cut(self, sigma_cut=5):
         # Quality cuts
         m = self.flux_err < sigma_cut * np.median(self.flux_err)
@@ -437,4 +456,4 @@ class LightCurve:
         m &= self.mag != "99.990"
         m &= self.mag_err < 99
 
-        return LightCurve(self.data[m], self.meta)
+        return LightCurve(self.data[m].copy(), self.meta)
