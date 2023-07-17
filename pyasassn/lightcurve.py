@@ -266,12 +266,14 @@ class LightCurve:
 
     def wavelet_power(
         self,
-        tt,
-        ff,
+        tt=None,
+        ff=None,
         include_poor_images=False,
         include_non_det=True,
         phot_filter="all",
         tradeoff=2,
+        plot=True,
+        **kwargs
     ):
         """
         Constructs a wavelet-transform power spectrum.
@@ -282,6 +284,8 @@ class LightCurve:
         :param phot_filter: specify bandpass filter for photometry, either g, V, or all, defaults to g
         :param include_non_det: whether or not to include non-detection events in analysis; defaults to False
         :tradeoff: Tradeoff parameter between frequency and time resolution
+        :plot: Construct figure
+        :**kwargs: Keyword arguments to pass to plt.imshow()
 
         :return: numpy array containing wavelet power at provided times and frequencies.
         """
@@ -309,7 +313,18 @@ class LightCurve:
         y = data.mag
         e_y = data.mag_err
 
-        return LS_wavelet(tt, ff, x, y, e_y, Γ=tradeoff)
+        if tt is None:
+            tt = np.linspace(np.min(x), np.max(x), 800)
+
+        if ff is None:
+            ff = np.linspace(1/(np.max(x) - np.min(x))/2, 1/np.max(np.diff(x))/2, 600)
+
+        wavelet = LS_wavelet(tt, ff, x, y, e_y, Γ=tradeoff)
+        if plot:
+            plt.imshow(wavelet, origin='lower', extent=(np.min(tt), np.max(tt), np.min(ff), np.max(ff)), **kwargs)
+            plt.xlabel(r"Time/d")
+            plt.ylabel(r"Frequency/d$^{-1}$")
+        return wavelet
 
     def find_period(
         self,
