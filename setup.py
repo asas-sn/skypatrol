@@ -12,7 +12,7 @@ from setuptools import setup, Extension
 #     sys.exit()
 
 # Load the __version__ variable without importing the package already
-# exec(open("skypatrol/version.py").read())
+exec(open("skypatrol/version.py").read())
 
 # Get dependencies
 with open("requirements.txt") as f:
@@ -20,7 +20,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="skypatrol",
-    version="0.6.12",
+    version=__version__,
     url="https://github.com/asas_sn/skypatrol/",
     author="ASAS-SN",
     author_email="kylehart@hawaii.edu",

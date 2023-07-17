@@ -9,20 +9,19 @@ import multiprocessing
 import re
 import os
 import io
-import traceback
 from time import sleep
 
-from .utils import LightCurveCollection
+from .collection import LightCurveCollection
 
 
 class SkyPatrolClient:
     """
-            The SkyPatrolClient allows users to interact with the ASAS-SN Sky Patrol photometry database.
-        This client enables users to use ADQL, cone searches, random samples, and catalog ID lookups on the input catalogs.
+        The SkyPatrolClient allows users to interact with the ASAS-SN Sky Patrol photometry database.
+    This client enables users to use ADQL, cone searches, random samples, and catalog ID lookups on the input catalogs.
 
-        Queries to the input catalogs will either be returned as pandas DataFrames containing aggregate information
-        on astronomical targets, or they will be returned as LightCurveCollections containing photometry data from all
-        queried targets.
+    Queries to the input catalogs will either be returned as pandas DataFrames containing aggregate information
+    on astronomical targets, or they will be returned as LightCurveCollections containing photometry data from all
+    queried targets.
     """
 
     def __init__(self, verbose=True):
@@ -434,7 +433,13 @@ class SkyPatrolClient:
             results = [
                 pool.apply_async(
                     self._get_lightcurve_chunk,
-                    args=(query_hash, idx, catalog, save_dir, file_format,),
+                    args=(
+                        query_hash,
+                        idx,
+                        catalog,
+                        save_dir,
+                        file_format,
+                    ),
                 )
                 for idx in range(n_chunks)
             ]
@@ -473,7 +478,7 @@ class SkyPatrolClient:
 
         # Loop through until we download or timeout
         while success is False and timeout <= 5:
-            try:            
+            try:
                 # Query API with (POST METHOD)
                 url = (
                     f"http://{self.block_servers[server_idx]}:9006/get_block/"
@@ -484,19 +489,21 @@ class SkyPatrolClient:
                 # Pandas dataframe
                 data = _deserialize(response.content)
                 # ID and count
-                id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
+                id_col = (
+                    "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
+                )
                 count = len(data[id_col].unique())
 
                 success = True
             except:
                 sleep(timeout)
                 server_idx = (server_idx + 1) % n_servers
-                
+
                 # Raise timeout if we've tried all servers once
                 if (server_idx % n_servers) == (block_idx % n_servers):
                     timeout += 1
-        
-        # If download fails, raise exception 
+
+        # If download fails, raise exception
         if success is False:
             raise TimeoutError("Lightcurve servers unavailable, try again later")
 
