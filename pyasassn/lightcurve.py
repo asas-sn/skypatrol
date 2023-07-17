@@ -273,6 +273,7 @@ class LightCurve:
         phot_filter="all",
         tradeoff=2,
         plot=True,
+        font_size=10,
         **kwargs
     ):
         """
@@ -324,6 +325,7 @@ class LightCurve:
             plt.imshow(wavelet, origin='lower', extent=(np.min(tt), np.max(tt), np.min(ff), np.max(ff)), **kwargs)
             plt.xlabel(r"Time/d")
             plt.ylabel(r"Frequency/d$^{-1}$")
+            self._label_plots(font_size)
         return wavelet
 
     def find_period(
