@@ -322,7 +322,8 @@ class LightCurve:
 
         wavelet = LS_wavelet(tt, ff, x, y, e_y, Γ=tradeoff)
         if plot:
-            plt.imshow(wavelet, origin='lower', extent=(np.min(tt), np.max(tt), np.min(ff), np.max(ff)), **kwargs)
+            plt.imshow(wavelet.T, origin='lower', aspect='auto',
+                       extent=(np.min(tt), np.max(tt), np.min(ff), np.max(ff)), **kwargs)
             plt.xlabel(r"Time/d")
             plt.ylabel(r"Frequency/d$^{-1}$")
             self._label_plots(font_size)
