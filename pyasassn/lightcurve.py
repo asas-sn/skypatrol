@@ -318,7 +318,7 @@ class LightCurve:
             tt = np.linspace(np.min(x), np.max(x), 800)
 
         if ff is None:
-            ff = np.linspace(1/(np.max(x) - np.min(x))/2, 1/np.max(np.diff(x))/2, 600)
+            ff = np.linspace(1/(np.max(x) - np.min(x))/2, 1/np.min(np.diff(x))/2, 600)
 
         wavelet = LS_wavelet(tt, ff, x, y, e_y, Γ=tradeoff)
         if plot:
