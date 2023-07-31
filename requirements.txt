@@ -4,4 +4,4 @@ pyarrow
 astropy
 numpy
 matplotlib
-tqdm
+tqdm>=4.65.0
