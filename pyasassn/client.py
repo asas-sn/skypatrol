@@ -177,7 +177,7 @@ class SkyPatrolClient:
 
         # Change units
         if units != "deg":
-            radius = _arc_to_deg(np.float(radius), units)
+            radius = _arc_to_deg(float(radius), units)
 
         # Query the Flask server API for cone
         url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_cone/radius{radius}_ra{ra_deg}_dec{dec_deg}"
