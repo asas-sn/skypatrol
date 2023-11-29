@@ -109,7 +109,7 @@ class SkyPatrolClient:
             else:
                 raise ValueError("needs propper id column to download lightcurves")
             # Get tar ids
-            tar_ids = list(id_col)
+            tar_ids = list(tar_df[id_col])
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
             return self._get_curves(
