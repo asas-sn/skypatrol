@@ -21,4 +21,5 @@ gcams = [
     "br",
     "bs",
     "bt",
+    "cB"
 ]

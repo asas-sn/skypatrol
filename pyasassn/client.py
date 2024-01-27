@@ -53,6 +53,126 @@ class SkyPatrolClient:
         except ConnectionError as e:
             raise ConnectionError("Unable to connect to ASAS-SN Servers")
 
+    def solar_system_object(self,
+                            obj_name, catalog, download=False, save_dir=None, file_format="parquet", threads=1
+                            ):
+        """
+        Lookup solar system object by name.
+
+        :param obj_name: name of object to lookup lightcurve; str.
+        :param catalog: which catalog are we searching, 'asteroids' or 'comets'
+        :param download: return full light curves if True, return catalog information if False
+        :param save_dir: if set, then light curves will write to file as they are downloaded
+        :param file_format: format to save light curves ['parquet', 'pickle', 'csv']
+        :param threads: number of real threads to use for pulling light curves from server.
+        :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
+                else LightCurveCollection
+        """
+        # Check inputs
+        if type(download) is not bool:
+            raise ValueError("'download' must be boolean value")
+        if type(threads) is not int:
+            raise ValueError("'threads' must be integer value")
+        if type(obj_name) is not str:
+            raise ValueError("'name' must me string value")
+        if catalog not in ['comets', 'asteroids']:
+            raise ValueError("catalog must be either 'asteroids' or 'comets'")
+
+        # Query API with list (POST METHOD)
+        url = f"http://asassn-lb01.ifa.hawaii.edu:9006/lookup_solar_system/{obj_name}"
+        response = requests.post(
+            url,
+            json={
+                "format": "arrow",
+                "download": download,
+                "catalog": catalog,
+            },
+        )
+
+        # Check response
+        self._validate_response(response)
+
+        # Deserialize from arrow
+        tar_df = _deserialize(response.content)
+        self.index = tar_df
+
+        if download is False:
+            # Return a dataframe of catalog search results
+            return tar_df
+        else:
+            if save_dir:
+                self._save_index(save_dir, file_format)
+            # Get lightcurve ids to pull
+            tar_ids = list(tar_df["mpc_entry"])
+
+            # Generate query information
+            query_id = "solar--" + obj_name
+            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
+
+            # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
+            return self._get_curves(
+                query_hash, tar_ids, catalog, save_dir, file_format, threads
+            )
+
+    def simbad_lookup(self,
+                      obj_name, download=False, save_dir=None, file_format="parquet", threads=1
+                      ):
+        """
+        Lookup using SIMBAD resolver.
+
+        :param obj_name: name of object to lookup lightcurve; str.
+        :param download: return full light curves if True, return catalog information if False
+        :param save_dir: if set, then light curves will write to file as they are downloaded
+        :param file_format: format to save light curves ['parquet', 'pickle', 'csv']
+        :param threads: number of real threads to use for pulling light curves from server.
+        :return: if 'download' if False; pandas Dataframe containing catalog information of targets;
+                else LightCurveCollection
+        """
+        # Check inputs
+        if type(download) is not bool:
+            raise ValueError("'download' must be boolean value")
+        if type(threads) is not int:
+            raise ValueError("'threads' must be integer value")
+        if type(obj_name) is not str:
+            raise ValueError("'name' must me string value")
+
+        # Query API with list (POST METHOD)
+
+        # url_name = urllib.parse.quote_plus(name)
+        url = f"http://asassn-lb01.ifa.hawaii.edu:9006/simbad_lookup/{obj_name}"
+        response = requests.post(
+            url,
+            json={
+                "format": "arrow",
+                "download": download,
+            },
+        )
+
+        # Check response
+        self._validate_response(response)
+
+        # Deserialize from arrow
+        tar_df = _deserialize(response.content)
+        self.index = tar_df
+
+        if download is False:
+            # Return a dataframe of catalog search results
+            return tar_df
+        else:
+            if save_dir:
+                self._save_index(save_dir, file_format)
+            # Get lightcurve ids to pull
+            tar_ids = list(tar_df["asas_sn_id"])
+
+            # Generate query information
+            query_id = obj_name
+            query_hash = encodebytes(bytes(query_id, encoding='utf-8')).decode()
+
+            # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
+            return self._get_curves(
+                query_hash, tar_ids, "extrasolar", save_dir, file_format, threads
+            )
+
     def adql_query(
         self, query_str, download=False, save_dir=None, file_format="parquet", threads=1
     ):
@@ -101,10 +221,10 @@ class SkyPatrolClient:
                 id_col = "asas_sn_id"
                 catalog = "extrasolar"
             elif "comets" in query_str:
-                id_col = "name"
+                id_col = "mpc_entry"
                 catalog = "comets"
             elif "asteroids" in query_str:
-                id_col = "name"
+                id_col = "mpc_entry"
                 catalog = "asteroids"
             else:
                 raise ValueError("needs propper id column to download lightcurves")
@@ -212,8 +332,7 @@ class SkyPatrolClient:
             query_hash = encodebytes(bytes(query_id, encoding="utf-8")).decode()
 
             # Get lightcurve ids to pull
-            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
-            tar_ids = list(tar_df[id_col])
+            tar_ids = list(tar_df["asas_sn_id"])
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
             return self._get_curves(
@@ -259,7 +378,10 @@ class SkyPatrolClient:
         if type(threads) is not int:
             raise ValueError("'threads' must be integer value")
         # Limit sources
-        if catalog not in self.catalogs.catalog_names():
+        if catalog not in self.catalogs.catalog_names() or catalog in [
+            "asteroids",
+            "comets",
+        ]:
             raise ValueError("invalid catalog")
 
         # Check catalog columns
@@ -275,7 +397,7 @@ class SkyPatrolClient:
             elif catalog not in ["stellar_main", "master_list"]:
                 cols.append("name")
         if cols is None and catalog in ["asteroids", "comets"]:
-            cols = ["name"]
+            cols = ["mpc_entry"]
         # Ensure valid columns
         if set(cols).issubset(set(self.catalogs[catalog]["col_names"])) is False:
             raise ValueError(
@@ -323,8 +445,7 @@ class SkyPatrolClient:
             query_hash = encodebytes(bytes(query_id, encoding="utf-8")).decode()
 
             # Get lightcurve ids to pull
-            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
-            tar_ids = list(tar_df[id_col])
+            tar_ids = list(tar_df["asas_sn_id"])
 
             # Returns a LightCurveCollection object, or a list of light curve files when save_dir is set
             return self._get_curves(
@@ -360,11 +481,15 @@ class SkyPatrolClient:
             raise ValueError("'download' must be boolean value")
         if type(threads) is not int:
             raise ValueError("'threads' must be integer value")
-        # Valid catalogs
-        if catalog not in self.catalogs.catalog_names():
+        # Limit sources
+        if catalog not in self.catalogs.catalog_names() or catalog in [
+            "asteroids",
+            "comets",
+        ]:
             raise ValueError("invalid catalog")
+
         # Set default columns
-        if cols is None and catalog not in ["asteroids", "comets"]:
+        if cols is None:
             cols = ["asas_sn_id", "ra_deg", "dec_deg"]
             if catalog == "m_giants":
                 cols.append("gaia_id")
@@ -372,8 +497,7 @@ class SkyPatrolClient:
                 cols.append("catalog_sources")
             elif catalog not in ["stellar_main", "master_list"]:
                 cols.append("name")
-        if cols is None and catalog in ["asteroids", "comets"]:
-            cols = ["name"]
+
         # Ensure valid columns
         if set(cols).issubset(set(self.catalogs[catalog]["col_names"])) is False:
             raise ValueError(
@@ -410,8 +534,7 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
-            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
-            tar_ids = list(tar_df[id_col])
+            tar_ids = list(tar_df["asas_sn_id"])
 
             # Generate query information
             query_id = f"random-{n}|catalog-{catalog}|cols-" + "/".join(cols)
@@ -461,7 +584,7 @@ class SkyPatrolClient:
         else:
             # Return in memory data as LightCurveCollection
             data = pd.concat(chunks)
-            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "mpc_entry"
             return LightCurveCollection(data, self.index, id_col)
 
     def _get_lightcurve_chunk(
@@ -490,7 +613,7 @@ class SkyPatrolClient:
                 data = _deserialize(response.content)
                 # ID and count
                 id_col = (
-                    "asas_sn_id" if catalog not in ["asteroids", "comets"] else "name"
+                    "asas_sn_id" if catalog not in ["asteroids", "comets"] else "mpc_entry"
                 )
                 count = len(data[id_col].unique())
 
@@ -639,5 +762,5 @@ def load_collection(save_dir, file_format="parquet"):
             f"invalid format: '{file_format}' not in ['parquet', 'csv', 'pickle']"
         )
 
-    id_col = "asas_sn_id" if "asas_sn_id" in index.columns else "name"
+    id_col = "asas_sn_id" if "asas_sn_id" in index.columns else "mpc_entry"
     return LightCurveCollection(data, index, id_col)
