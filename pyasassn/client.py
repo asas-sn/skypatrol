@@ -482,21 +482,25 @@ class SkyPatrolClient:
         if type(threads) is not int:
             raise ValueError("'threads' must be integer value")
         # Limit sources
-        if catalog not in self.catalogs.catalog_names() or catalog in [
-            "asteroids",
-            "comets",
-        ]:
+        if catalog not in self.catalogs.catalog_names():
+            # or catalog in [
+            # "asteroids",
+            # "comets",
+            # ]:
             raise ValueError("invalid catalog")
 
         # Set default columns
         if cols is None:
-            cols = ["asas_sn_id", "ra_deg", "dec_deg"]
-            if catalog == "m_giants":
-                cols.append("gaia_id")
-            elif catalog == "master_list":
-                cols.append("catalog_sources")
-            elif catalog not in ["stellar_main", "master_list"]:
-                cols.append("name")
+            if catalog in ["asteroids", "comets"]:
+                cols = ["mpc_entry"]
+            else:
+                cols = ["asas_sn_id", "ra_deg", "dec_deg"]
+                if catalog == "m_giants":
+                    cols.append("gaia_id")
+                elif catalog == "master_list":
+                    cols.append("catalog_sources")
+                elif catalog not in ["stellar_main", "master_list"]:
+                    cols.append("name")
 
         # Ensure valid columns
         if set(cols).issubset(set(self.catalogs[catalog]["col_names"])) is False:
