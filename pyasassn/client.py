@@ -552,6 +552,10 @@ class SkyPatrolClient:
     def _get_curves(
         self, query_hash, tar_ids, catalog, save_dir, file_format, threads=1
     ):
+        # If we are querying 0 target ids then just return None (edge case)
+        if tar_ids is None or len(tar_ids) == 0:
+            return None
+
         # Get number of id chunks
         n_chunks = int(np.ceil(len(tar_ids) / 1000))
         self._verbose_print("Downloading Curves...")
