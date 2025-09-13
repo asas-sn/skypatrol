@@ -538,7 +538,8 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
-            tar_ids = list(tar_df["asas_sn_id"])
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "mpc_entry"
+            tar_ids = list(id_col)
 
             # Generate query information
             query_id = f"random-{n}|catalog-{catalog}|cols-" + "/".join(cols)
