@@ -9,7 +9,7 @@ from setuptools import setup, Extension
 #     os.system("python setup.py sdist bdist_wheel")
 #     os.system("twine upload dist/*")
 #     os.system("rm -rf dist/skypatrol*")
-#     sys.exit()
+#     sys.exit()  3216b935-378a-4c4b-bce2-f43bfc81e82a
 
 # Load the __version__ variable without importing the package already
 # exec(open("skypatrol/version.py").read())
@@ -20,7 +20,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="skypatrol",
-    version="0.6.20",
+    version="0.6.21",
     url="https://github.com/asas_sn/skypatrol/",
     author="ASAS-SN",
     author_email="kylehart@hawaii.edu",
