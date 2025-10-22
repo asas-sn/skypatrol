@@ -587,9 +587,12 @@ class SkyPatrolClient:
             return [file for chunk in chunks for file in chunk]
         else:
             # Return in memory data as LightCurveCollection
-            data = pd.concat(chunks)
-            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "mpc_entry"
-            return LightCurveCollection(data, self.index, id_col)
+            if not chunks:
+                return None
+            else:
+                data = pd.concat(chunks)
+                id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "mpc_entry"
+                return LightCurveCollection(data, self.index, id_col)
 
     def _get_lightcurve_chunk(
         self, query_hash, block_idx, catalog, save_dir, file_format
