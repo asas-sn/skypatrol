@@ -538,7 +538,8 @@ class SkyPatrolClient:
             if save_dir:
                 self._save_index(save_dir, file_format)
             # Get lightcurve ids to pull
-            tar_ids = list(tar_df["asas_sn_id"])
+            id_col = "asas_sn_id" if catalog not in ["asteroids", "comets"] else "mpc_entry"
+            tar_ids = list(id_col)
 
             # Generate query information
             query_id = f"random-{n}|catalog-{catalog}|cols-" + "/".join(cols)
@@ -552,6 +553,10 @@ class SkyPatrolClient:
     def _get_curves(
         self, query_hash, tar_ids, catalog, save_dir, file_format, threads=1
     ):
+        # If we are querying 0 target ids then just return None (edge case)
+        if tar_ids is None or len(tar_ids) == 0:
+            return None
+
         # Get number of id chunks
         n_chunks = int(np.ceil(len(tar_ids) / 1000))
         self._verbose_print("Downloading Curves...")
